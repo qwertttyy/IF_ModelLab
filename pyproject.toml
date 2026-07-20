@@ -1,0 +1,54 @@
+[project]
+name = 'ironflow-vision-experiment-platform'
+version = '0.1.0'
+description = 'IronFlow vision experiment platform'
+requires-python = '>=3.10'
+dependencies = [
+    'matplotlib>=3.8',
+    'pandas>=2',
+    'pillow>=10',
+    'polars>=1',
+    'pyyaml>=6',
+]
+
+[project.optional-dependencies]
+test = [
+    'pytest>=8',
+]
+classification = [
+    'torch>=2',
+    'torchvision>=0.17',
+]
+timm = [
+    'timm>=0.9',
+]
+yolo = [
+    'ultralytics>=8',
+]
+augmentation = [
+    'albumentations>=1.4',
+]
+
+[project.scripts]
+ironflow-exp = 'ironflow_exp.runners.cli:main'
+ironflow-engine = 'ironflow_exp.engine.cli.main:main'
+ironflow-engine-gui = 'ironflow_exp.engine.ui.tk_app:main'
+ironflow-engine-remote-task-adapter = 'ironflow_exp.engine.remote_task_adapter:main'
+
+[tool.pytest.ini_options]
+pythonpath = ['src']
+addopts = ['--basetemp=runs/pytest_tmp']
+norecursedirs = [
+    'runs',
+    'local_remote_simulator',
+    '.git',
+    '.pytest_cache',
+    '__pycache__',
+]
+markers = [
+    'integration: runs a multi-step engine flow such as CLI run/collect or local runner prepare/run/collect',
+    'optional_deps: requires optional model dependencies such as torch, torchvision, timm, or ultralytics',
+    'real_adapter_smoke: exercises config-gated real model adapter smoke paths without training or pretrained downloads',
+    'gui: covers Tkinter GUI controller, scenario, or selection behavior without requiring a visible GUI window',
+    'ssh: covers SSH/WSL runner, server profile, or staged remote execution behavior',
+]

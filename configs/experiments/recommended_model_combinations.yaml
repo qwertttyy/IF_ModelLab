@@ -1,0 +1,793 @@
+﻿schema_version: '0.1'
+name: 'recommended_model_combinations'
+description: >
+  Project-fit model combinations distilled from docs_2/model_md and the current
+  IronFlow model registry. This file is a recommendation matrix, not a directly
+  executable engine config.
+
+source_model_docs:
+  - '../../../../docs_2/model_md/ironflow_model_final_integrated_complete.md'
+  - '../../../../docs_2/model_md/ironflow_vast_ai_gpu_environment_recommendation.md'
+
+selection_policy:
+  default_train_weight_mode: 'pretrained_or_checkpoint'
+  smoke_weight_mode: 'architecture_only'
+  first_gpu_target: 'single RTX 4090 / 16-24GB+ VRAM class'
+  final_selection_rule: >
+    Pick the smallest image-only combination that meets the required detection recall,
+    crop classification macro-F1, end-to-end object accuracy, and latency budget.
+
+existing_coverage:
+  - id: 'original_yolo11n_mobilenetv3_small'
+    files:
+      - '../presets/original_yolo11n_mobilenetv3_small.yaml'
+      - '../presets/original_yolo11n_mobilenetv3_small.json'
+    coverage: 'Legacy runnable preset: YOLO11n detection + MobileNetV3 Small classification.'
+  - id: 'local_yolo_torchvision_chain_smoke'
+    files:
+      - '../engine/local_yolo_torchvision_chain_smoke.yaml'
+    coverage: 'Engine smoke: YOLO11n -> detector crop -> MobileNetV3 Small.'
+  - id: 'local_yolo_torchvision_bytetrack_chain_smoke'
+    files:
+      - '../engine/local_yolo_torchvision_bytetrack_chain_smoke.yaml'
+    coverage: 'Engine smoke: YOLO11n -> detector crop -> MobileNetV3 Small + ByteTrack.'
+  - id: 'gpu_yolo_detection_m1a2_smoke'
+    files:
+      - '../engine/gpu_yolo_detection_m1a2_smoke.yaml'
+    coverage: 'Remote GPU train smoke for YOLO11n detection.'
+  - id: 'gpu_torchvision_classification_m1a2_smoke'
+    files:
+      - '../engine/gpu_torchvision_classification_m1a2_smoke.yaml'
+    coverage: 'Remote GPU train smoke for MobileNetV3 Small classification.'
+  - id: 'gpu_timm_classification_m1a2_smoke'
+    files:
+      - '../engine/gpu_timm_classification_m1a2_smoke.yaml'
+    coverage: 'Remote GPU train smoke for ConvNeXt V2 Tiny classification.'
+
+recommended_combinations:
+  - id: 'baseline_fast_yolo11n_mobilenetv3_small'
+    priority: 1
+    stage: 'run_now'
+    objective: 'Fastest end-to-end baseline with the lowest implementation risk.'
+    tradeoff: 'Best for smoke, regression, and speed baseline; not expected to be the final accuracy ceiling.'
+    runtime_targets: ['local', 'wsl', 'gpu']
+    metrics_focus: ['map50_95', 'macro_f1', 'object_level_accuracy', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'validated'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'mobilenet_v3_small'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'validated'
+
+  - id: 'balanced_yolo11n_efficientnet_b0'
+    priority: 2
+    stage: 'first_gpu_batch'
+    objective: 'Keep the validated detector path and test a stronger but still efficient crop classifier.'
+    tradeoff: 'Slightly slower than MobileNetV3 Small, usually a better accuracy/efficiency candidate.'
+    runtime_targets: ['wsl', 'gpu']
+    metrics_focus: ['macro_f1', 'class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'validated'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_accuracy_yolo11n_convnext_v2_tiny'
+    priority: 3
+    stage: 'first_gpu_batch'
+    objective: 'Measure whether a modern CNN classifier improves hard military-vehicle crop classes.'
+    tradeoff: 'Heavier than MobileNet/EfficientNetB0; should only win if macro-F1 improves enough.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'confusion_matrix', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'validated'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'convnext_v2_tiny'
+        adapter_key: 'timm_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'attention_yolo12n_efficientnet_b0'
+    priority: 4
+    stage: 'second_gpu_batch'
+    objective: 'Compare the validated YOLO11n path against the attention-centric YOLO-family candidate.'
+    tradeoff: 'More strategically useful than YOLOv8 for final selection, but needs runtime validation first.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'recall', 'small_object_recall', 'object_level_accuracy', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo12n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'yolo26_only_detection_classification'
+    priority: 5
+    stage: 'after_adapter_gate'
+    objective: 'Test YOLO26 as the single-family supervised chain for both detection and crop classification.'
+    tradeoff: 'Clear YOLO26-only baseline; classification uses the Ultralytics classify head rather than an EfficientNet crop classifier.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo26n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'yolo26n-cls'
+        adapter_key: 'ultralytics_yolo_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'detr_precision_rf_detr_convnext_v2_tiny'
+    priority: 6
+    stage: 'foundation_top10'
+    objective: 'Benchmark RF-DETR as the high-accuracy transformer detector direction from model_md.'
+    tradeoff: 'Potential detector accuracy gain; requires GPU-side RF-DETR package wrapper validation.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'bbox_precision', 'macro_f1', 'object_level_accuracy', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'rf_detr'
+        adapter_key: 'rf_detr_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'convnext_v2_tiny'
+        adapter_key: 'timm_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'detr_speed_d_fine_efficientnet_v2_s'
+    priority: 7
+    stage: 'foundation_top10'
+    objective: 'Benchmark D-FINE as the real-time DETR-family detector against YOLO and RF-DETR.'
+    tradeoff: 'Good speed/accuracy candidate; requires D-FINE repo/config wrapper validation on GPU.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'bbox_precision', 'macro_f1', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'd_fine'
+        adapter_key: 'd_fine_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'efficientnet_v2_s'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'rtdetr_global_context_efficientnet_b0'
+    priority: 8
+    stage: 'foundation_top10'
+    objective: 'Use RT-DETR as the transformer detector with the clearest Ultralytics train/predict path.'
+    tradeoff: 'Larger than nano YOLO baselines; useful for global-context detection comparison.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'recall', 'object_level_accuracy', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'rt_detr'
+        adapter_key: 'rt_detr_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'next_yolo_family_yolo26n_efficientnet_b0'
+    priority: 9
+    stage: 'second_gpu_batch'
+    objective: 'Compare YOLO26 detection with the validated EfficientNet-B0 crop classifier.'
+    tradeoff: 'Keeps the YOLO26 detector fixed while testing whether EfficientNet-B0 beats the YOLO26 classification head.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'small_object_recall', 'macro_f1', 'object_level_accuracy', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo26n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'classification'
+        input: 'detector_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'embedding_review_yolo26_sam2_openclip'
+    priority: 10
+    stage: 'foundation_top10'
+    experiment_type: 'review_path'
+    objective: 'Use YOLO26 detections with SAM2 masks and OpenCLIP embeddings for visual similarity review.'
+    tradeoff: 'Embedding pipeline is for review/retrieval and classifier support, not pure supervised classifier training.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50_95', 'mask_quality', 'embedding_neighbor_purity', 'review_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo26n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+      - task_type: 'preprocessing'
+        input: 'detection_predictions'
+        adapter_key: 'detection_to_classification_crop'
+        readiness: 'validated'
+      - task_type: 'segmentation'
+        input: 'detection_predictions'
+        model_id: 'sam2'
+        adapter_key: 'sam_promptable_segmentation'
+        readiness: 'prepared'
+      - task_type: 'embedding'
+        input: 'detector_crop'
+        model_id: 'openclip_vit_b_32'
+        adapter_key: 'clip_embedding'
+        readiness: 'prepared'
+
+standalone_experiments:
+  - id: 'detector_yolo11n'
+    priority: 1
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Train and evaluate YOLO11n as a detector-only baseline on the fixed detection split.'
+    tradeoff: 'Lowest-risk YOLO detector baseline; used to compare detector quality before classifier coupling.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'validated'
+
+  - id: 'detector_yolo12n'
+    priority: 2
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate YOLO12n as an attention-centric YOLO detector candidate.'
+    tradeoff: 'Useful YOLO-family contrast; may carry higher memory or runtime risk than YOLO11.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo12n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_yolo26n'
+    priority: 3
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate YOLO26n as the next YOLO-family detector candidate.'
+    tradeoff: 'Important for final YOLO26 comparison; detector-only results separate localization quality from classifier effects.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo26n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_rf_detr'
+    priority: 4
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate RF-DETR as a detector-only transformer candidate.'
+    tradeoff: 'Potential detection quality gain; heavier dependency and runtime path than YOLO-family detectors.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'bbox_precision', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'rf_detr'
+        adapter_key: 'rf_detr_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_d_fine'
+    priority: 5
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate D-FINE as a detector-only real-time DETR candidate.'
+    tradeoff: 'Useful speed/accuracy detector comparison; depends on the D-FINE native wrapper path.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'bbox_precision', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'd_fine'
+        adapter_key: 'd_fine_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_rt_detr'
+    priority: 6
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate RT-DETR as an Ultralytics-supported detector-only transformer candidate.'
+    tradeoff: 'Clearer Ultralytics train/predict path than some foundation detector wrappers, but larger than nano YOLO baselines.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'bbox_precision', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'rt_detr'
+        adapter_key: 'rt_detr_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_yolov8n'
+    priority: 7
+    stage: 'detector_screening'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate YOLOv8n as a mature Ultralytics reference detector.'
+    tradeoff: 'Useful as a stable reference baseline against newer YOLO11/12/26 detector families.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolov8n'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_yolo11s'
+    priority: 8
+    stage: 'detector_screening_size_ablation'
+    experiment_type: 'detector_only'
+    objective: 'Run YOLO11s size ablation to measure the accuracy/runtime gain over YOLO11n.'
+    tradeoff: 'Higher compute than YOLO11n; should justify itself through map50 and recall gains.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo11s'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_yolo12s'
+    priority: 9
+    stage: 'detector_screening_size_ablation'
+    experiment_type: 'detector_only'
+    objective: 'Run YOLO12s size ablation to measure whether the small model improves detector recall.'
+    tradeoff: 'Heavier than YOLO12n; useful only if detection metrics improve enough for end-to-end recombination.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo12s'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_yolo26s'
+    priority: 10
+    stage: 'detector_screening_size_ablation'
+    experiment_type: 'detector_only'
+    objective: 'Run YOLO26s size ablation for the strongest YOLO26 detector-only candidate.'
+    tradeoff: 'Largest YOLO-family screening candidate in this batch; should be promoted only if map50/recall gains offset runtime.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'small_object_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'yolo26s'
+        adapter_key: 'ultralytics_yolo_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_rt_detr_v2'
+    priority: 11
+    stage: 'detector_screening_foundation_ablation'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate RT-DETRv2 as the newer Hugging Face real-time DETR detector candidate.'
+    tradeoff: 'Promising RT-DETR successor; Hugging Face native wrapper is implemented and still needs GPU validation before promotion.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'bbox_precision', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'rt_detr_v2'
+        adapter_key: 'rt_detr_v2_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'detector_lw_detr'
+    priority: 12
+    stage: 'detector_screening_foundation_ablation'
+    experiment_type: 'detector_only'
+    objective: 'Evaluate LW-DETR as a lightweight DETR-family detector candidate.'
+    tradeoff: 'Interesting lightweight transformer detector; Hugging Face native wrapper is implemented and should be validated before promotion.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['map50', 'map50_95', 'recall', 'bbox_precision', 'p95_latency']
+    pipeline:
+      - task_type: 'detection'
+        input: 'original'
+        model_id: 'lw_detr'
+        adapter_key: 'lw_detr_detection'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_mobilenet_v3_small'
+    priority: 1
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate MobileNetV3 Small as the fastest crop classifier baseline.'
+    tradeoff: 'Lowest-resource classifier baseline; may trail larger classifiers on hard class boundaries.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'mobilenet_v3_small'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'validated'
+
+  - id: 'classifier_efficientnet_b0'
+    priority: 2
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNet-B0 as a balanced crop classifier.'
+    tradeoff: 'Important balanced classifier baseline for crop-only screening and end-to-end recombination.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_convnext_v2_tiny'
+    priority: 3
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate ConvNeXt V2 Tiny as a modern ConvNet crop classifier.'
+    tradeoff: 'Heavier than MobileNetV3/EfficientNet-B0; should justify itself with macro-F1 and hard-class recall.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'convnext_v2_tiny'
+        adapter_key: 'timm_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_efficientnet_v2_s'
+    priority: 4
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNetV2-S as a stronger efficient crop classifier.'
+    tradeoff: 'Larger than EfficientNet-B0; useful if it improves hard-class recall enough to offset runtime.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_v2_s'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_yolo26n_cls'
+    priority: 5
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate YOLO26n-cls as the YOLO-family crop classifier head.'
+    tradeoff: 'Useful for comparing the YOLO26 classification head against Torchvision/timm classifiers on the same crop data.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'yolo26n-cls'
+        adapter_key: 'ultralytics_yolo_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_efficientnet_b3'
+    priority: 6
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNet-B3 as a higher-capacity efficient crop classifier.'
+    tradeoff: 'Heavier than EfficientNet-B0; useful if macro-F1 and hard-class recall improve enough.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_b3'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_mobilenet_v3_large'
+    priority: 7
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate MobileNetV3 Large as a stronger mobile crop classifier.'
+    tradeoff: 'Moderately heavier than MobileNetV3 Small; should keep latency low while improving recall.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'mobilenet_v3_large'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_resnet50'
+    priority: 8
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate ResNet-50 as a classic strong CNN crop classifier baseline.'
+    tradeoff: 'Heavier and older than efficient classifiers, but useful as a recognizable accuracy baseline.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'resnet50'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_resnext50_32x4d'
+    priority: 9
+    stage: 'classifier_screening'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate ResNeXt-50 32x4d as a stronger residual CNN crop classifier.'
+    tradeoff: 'Heavier than ResNet-50 but useful as a classic CNN accuracy upgrade candidate.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'resnext50_32x4d'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_convnext_small'
+    priority: 10
+    stage: 'classifier_screening_size_ablation'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate ConvNeXt Small as a higher-capacity modern ConvNet classifier with a valid timm pretrained checkpoint.'
+    tradeoff: 'Heavier than ConvNeXt V2 Tiny; should be promoted only if hard-class recall improves enough.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'convnext_small'
+        adapter_key: 'timm_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'classifier_swin_tiny'
+    priority: 11
+    stage: 'classifier_screening_transformer_ablation'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate Swin Tiny as a compact transformer-style crop classifier.'
+    tradeoff: 'Useful shape/attention contrast against CNN classifiers; may be slower than efficient CNNs.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'swin_tiny'
+        adapter_key: 'timm_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'aug_av_classifier_efficientnet_b3'
+    priority: 12
+    stage: 'classifier_av_crop_aug_top5'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNet-B3 on AV-only crop weak-augmentation data using the previous MBT crop top5 protocol.'
+    tradeoff: 'AV-only counterpart to the previous MBT crop top5 experiment; compare macro-F1, hard-class recall, and latency.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_b3'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'aug_av_classifier_efficientnet_b0'
+    priority: 13
+    stage: 'classifier_av_crop_aug_top5'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNet-B0 on AV-only crop weak-augmentation data using the previous MBT crop top5 protocol.'
+    tradeoff: 'AV-only counterpart to the previous MBT crop top5 experiment; compare macro-F1, hard-class recall, and latency.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'aug_av_classifier_mobilenet_v3_large'
+    priority: 14
+    stage: 'classifier_av_crop_aug_top5'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate MobileNetV3-Large on AV-only crop weak-augmentation data using the previous MBT crop top5 protocol.'
+    tradeoff: 'AV-only counterpart to the previous MBT crop top5 experiment; compare macro-F1, hard-class recall, and latency.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'mobilenet_v3_large'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'aug_av_classifier_efficientnet_v2_s'
+    priority: 15
+    stage: 'classifier_av_crop_aug_top5'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate EfficientNetV2-S on AV-only crop weak-augmentation data using the previous MBT crop top5 protocol.'
+    tradeoff: 'AV-only counterpart to the previous MBT crop top5 experiment; compare macro-F1, hard-class recall, and latency.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'efficientnet_v2_s'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+  - id: 'aug_av_classifier_resnet50'
+    priority: 16
+    stage: 'classifier_av_crop_aug_top5'
+    experiment_type: 'classifier_only'
+    objective: 'Train and evaluate ResNet50 on AV-only crop weak-augmentation data using the previous MBT crop top5 protocol.'
+    tradeoff: 'AV-only counterpart to the previous MBT crop top5 experiment; compare macro-F1, hard-class recall, and latency.'
+    runtime_targets: ['gpu']
+    metrics_focus: ['macro_f1', 'macro_recall', 'min_class_recall', 'p95_latency']
+    pipeline:
+      - task_type: 'classification'
+        input: 'classification_crop'
+        model_id: 'resnet50'
+        adapter_key: 'torchvision_classifier'
+        readiness: 'adapter_ready'
+
+deferred_foundation_combinations:
+  - id: 'open_vocab_grounding_dino_sam2_dinov3_audit'
+    reason: 'GroundingDINO is not a supervised training path yet, and DINOv3 pretrained weights require permitted local/cache access.'
+  - id: 'segmentation_supervised_yolo11n_seg_efficientnet_b0'
+    reason: 'Requires reliable mask/polygon data before it belongs in the real-training Top10.'
+  - id: 'classic_cnn_yolo11n_resnet50_bytetrack'
+    reason: 'Useful baseline, but lower priority than RF-DETR/D-FINE/RT-DETR and foundation review workflows.'
+  - id: 'transformer_crop_yolo11n_vit_tiny_bytetrack'
+    reason: 'Useful classifier contrast, but lower priority than DINO/CLIP embedding review for this project.'
+
+experiment_matrices:
+  - id: 'gpu_classification_crop_matrix'
+    stage: 'first_gpu_batch'
+    fixed_steps:
+      - task_type: 'detection'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+      - task_type: 'preprocessing'
+        adapter_key: 'detection_to_classification_crop'
+    axis:
+      task_type: 'classification'
+      input: 'detector_crop'
+      candidates:
+        - model_id: 'mobilenet_v3_small'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'mobilenet_v3_large'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'efficientnet_b0'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'efficientnet_b3'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'efficientnet_v2_s'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'convnext_v2_tiny'
+          adapter_key: 'timm_classifier'
+        - model_id: 'resnext50_32x4d'
+          adapter_key: 'torchvision_classifier'
+        - model_id: 'convnext_small'
+          adapter_key: 'timm_classifier'
+        - model_id: 'swin_tiny'
+          adapter_key: 'timm_classifier'
+
+  - id: 'gpu_detection_family_matrix'
+    stage: 'second_gpu_batch'
+    fixed_steps:
+      - task_type: 'preprocessing'
+        adapter_key: 'detection_to_classification_crop'
+      - task_type: 'classification'
+        model_id: 'efficientnet_b0'
+        adapter_key: 'torchvision_classifier'
+    axis:
+      task_type: 'detection'
+      input: 'original'
+      candidates:
+        - model_id: 'yolo11n'
+          adapter_key: 'ultralytics_yolo_detection'
+        - model_id: 'yolov8n'
+          adapter_key: 'ultralytics_yolo_detection'
+        - model_id: 'yolo12n'
+          adapter_key: 'ultralytics_yolo_detection'
+        - model_id: 'yolo26n'
+          adapter_key: 'ultralytics_yolo_detection'
+        - model_id: 'rt_detr'
+          adapter_key: 'rt_detr_detection'
+        - model_id: 'rf_detr'
+          adapter_key: 'rf_detr_detection'
+        - model_id: 'd_fine'
+          adapter_key: 'd_fine_detection'
+        - model_id: 'rt_detr_v2'
+          adapter_key: 'rt_detr_v2_detection'
+        - model_id: 'lw_detr'
+          adapter_key: 'lw_detr_detection'
+
+  - id: 'tracking_video_matrix'
+    stage: 'after_video_dataset'
+    fixed_steps:
+      - task_type: 'detection'
+        model_id: 'yolo11n'
+        adapter_key: 'ultralytics_yolo_detection'
+    axis:
+      task_type: 'tracking'
+      input: 'detection_sequence'
+      candidates:
+        - model_id: 'bytetrack'
+          adapter_key: 'bytetrack_tracker'
+        - model_id: 'oc_sort'
+          adapter_key: 'ocsort_tracker'
+        - model_id: 'bot_sort'
+          adapter_key: 'botsort_tracker'

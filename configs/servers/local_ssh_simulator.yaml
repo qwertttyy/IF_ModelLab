@@ -1,0 +1,10 @@
+server:
+  name: local_ssh_simulator
+  type: local_ssh_simulator
+  host: null
+  port: null
+  username: null
+  key_path: null
+  remote_workspace: ../../local_remote_simulator/workspace/ssh_contract
+  gpu_name: null
+  total_vram: null

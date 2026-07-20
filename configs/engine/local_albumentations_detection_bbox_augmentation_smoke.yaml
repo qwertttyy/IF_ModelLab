@@ -1,0 +1,154 @@
+schema_version: '0.1'
+experiment:
+  name: local_albumentations_detection_bbox_augmentation_smoke
+  description: Local Albumentations detection bbox augmentation -> detection -> crop
+    -> classification smoke.
+  tags:
+  - local
+  - adapter-chain
+  - augmentation
+  - albumentations
+  - detection
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/mock_train.py
+  - datasets/augmentation_policy_fixture/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '1'
+  - --model
+  - albumentations_detection_bbox_augmentation_smoke
+  - --dataset
+  - augmentation_policy_fixture
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: augmentation_policy_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/augmentation_policy_fixture
+  enabled: true
+- id: augmentation_detection_dataset
+  kind: augmentation
+  source: augmentation_policy_fixture
+  enabled: true
+- id: augmentation_detector_crop
+  kind: detector_crop
+  source: augmentation_detection_dataset
+  enabled: true
+tasks:
+- id: augment_detection_bboxes
+  task_type: augmentation
+  input_variant: augmentation_policy_fixture
+  adapter: albumentations_detection_bbox
+  enabled: true
+  params:
+    target_split: train
+    policy_id: albumentations_detection_bbox_v1
+    augmentation_recipe: albumentations_horizontal_flip_bbox_xyxy_v1
+    label_transform: albumentations_bbox_xyxy
+    bbox_format: pascal_voc
+    bbox_policy:
+      clip: true
+      filter_invalid_bboxes: true
+      min_area: 0.0
+      min_visibility: 0.0
+      min_width: 0.0
+      min_height: 0.0
+    seed: 20260616
+    transforms:
+    - name: HorizontalFlip
+      p: 1.0
+    - name: RandomBrightnessContrast
+      brightness_limit: 0.1
+      contrast_limit: 0.1
+      p: 1.0
+    - name: Blur
+      blur_limit: 3
+      p: 0.5
+    preserve_original_sample_id: true
+    preserve_split: true
+    record_augmentation_id: true
+    record_augmentation_recipe: true
+    record_label_transform: true
+- id: detect_augmented_dataset
+  task_type: detection
+  input_variant: augmentation_detection_dataset
+  model_id: manifest_detection_smoke
+  adapter: manifest_detection_smoke
+  enabled: true
+  depends_on:
+  - augment_detection_bboxes
+  params:
+    default_class_id: tank
+    score: 0.95
+    batch_size: 8
+- id: make_detector_crops
+  task_type: preprocessing
+  input_variant: augmentation_detection_dataset
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - detect_augmented_dataset
+  - augment_detection_bboxes
+  params:
+    source_task_id: detect_augmented_dataset
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.0
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: augmentation_detector_crops
+- id: classify_augmented_detector_crops
+  task_type: classification
+  input_variant: augmentation_detector_crop
+  model_id: manifest_classification_smoke
+  adapter: manifest_classification_smoke
+  enabled: true
+  depends_on:
+  - make_detector_crops
+  params:
+    fallback_class_id: k2
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/**/*.json
+  - tasks/**/crops/**/*
+  - tasks/**/inputs/**/*
+  - tasks/**/augmented_images/**/*
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/albumentations_detection_bbox_augmentation_experiments.sqlite3

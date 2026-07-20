@@ -1,0 +1,188 @@
+{
+  "schema_version": "0.1",
+  "experiment": {
+    "name": "original_yolo11n_mobilenetv3_small",
+    "description": "YOLO11n detection on original images and MobileNetV3 Small classification on GT crops",
+    "seed": 42,
+    "tags": [
+      "v0.1",
+      "baseline",
+      "detection",
+      "classification"
+    ]
+  },
+  "runtime": {
+    "runner": "local",
+    "device": "auto",
+    "precision": "fp32",
+    "num_workers": 4
+  },
+  "dataset": {
+    "dataset_id": "ironflow_full_detection_v1",
+    "source_root": "../cpu_vision_baseline/data/full/detection",
+    "dataset_format": "yolo_detection",
+    "label_format": "yolo_bbox",
+    "split": {
+      "strategy": "existing",
+      "group_key": "split_group_id",
+      "train_ratio": 0.7,
+      "val_ratio": 0.2,
+      "test_ratio": 0.1,
+      "seed": 42
+    },
+    "class_map": {
+      "0": "k1",
+      "1": "k2",
+      "2": "m1a2",
+      "3": "t62",
+      "4": "t72",
+      "5": "type99",
+      "6": "type96",
+      "7": "t90"
+    }
+  },
+  "preprocessing": {
+    "mode": "multi_task",
+    "task_inputs": {
+      "detection": "original",
+      "classification": "gt_crop",
+      "segmentation": "none",
+      "embedding": "none"
+    },
+    "crop": {
+      "enabled": true,
+      "source": "gt_bbox",
+      "padding_ratio": 0.08
+    },
+    "augmentation": {
+      "enabled": false,
+      "target_split": "train",
+      "policy_id": "none"
+    },
+    "segmentation": {
+      "enabled": false,
+      "source": "none",
+      "output_mode": "mask"
+    }
+  },
+  "models": {
+    "detection": {
+      "enabled": true,
+      "model_id": "yolo11n",
+      "adapter": "ultralytics_yolo",
+      "checkpoint": null,
+      "pretrained": true,
+      "train": {
+        "enabled": true,
+        "epochs": 30,
+        "image_size": 640,
+        "batch_size": 16,
+        "learning_rate": null
+      },
+      "predict": {
+        "enabled": true,
+        "confidence_threshold": 0.25,
+        "iou_threshold": 0.7,
+        "top_k": null
+      }
+    },
+    "classification": {
+      "enabled": true,
+      "model_id": "mobilenet_v3_small",
+      "adapter": "torchvision_classifier",
+      "checkpoint": null,
+      "pretrained": true,
+      "train": {
+        "enabled": true,
+        "epochs": 10,
+        "image_size": 224,
+        "batch_size": 32,
+        "learning_rate": 0.0003
+      },
+      "predict": {
+        "enabled": true,
+        "confidence_threshold": null,
+        "iou_threshold": null,
+        "top_k": 5
+      }
+    },
+    "segmentation": {
+      "enabled": false,
+      "model_id": null,
+      "adapter": null,
+      "checkpoint": null,
+      "pretrained": true,
+      "train": {
+        "enabled": false,
+        "epochs": null,
+        "image_size": null,
+        "batch_size": null,
+        "learning_rate": null
+      },
+      "predict": {
+        "enabled": false,
+        "confidence_threshold": null,
+        "iou_threshold": null,
+        "top_k": null
+      }
+    },
+    "embedding": {
+      "enabled": false,
+      "model_id": null,
+      "adapter": null,
+      "checkpoint": null,
+      "pretrained": true,
+      "output_dim": null,
+      "train": {
+        "enabled": false,
+        "epochs": null,
+        "image_size": null,
+        "batch_size": null,
+        "learning_rate": null
+      },
+      "predict": {
+        "enabled": false,
+        "confidence_threshold": null,
+        "iou_threshold": null,
+        "top_k": null
+      }
+    }
+  },
+  "evaluation": {
+    "detection": {
+      "enabled": true,
+      "metrics": [
+        "precision",
+        "recall",
+        "map50",
+        "map50_95"
+      ]
+    },
+    "classification": {
+      "enabled": true,
+      "metrics": [
+        "accuracy",
+        "macro_precision",
+        "macro_recall",
+        "macro_f1",
+        "confusion_matrix"
+      ]
+    },
+    "segmentation": {
+      "enabled": false,
+      "metrics": []
+    },
+    "latency": {
+      "enabled": true,
+      "warmup_runs": 3
+    }
+  },
+  "export": {
+    "output_root": "outputs",
+    "save_json": true,
+    "save_csv": true,
+    "save_report": true,
+    "save_bundle": true,
+    "save_visualizations": true
+  }
+}

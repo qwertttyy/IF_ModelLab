@@ -1,0 +1,86 @@
+schema_version: '0.1'
+experiment:
+  name: 'local_augmentation_policy_smoke'
+  description: 'Local train-only augmentation policy smoke.'
+  tags:
+    - 'local'
+    - 'augmentation'
+    - 'policy'
+runtime:
+  runner: 'local_simulator'
+  workspace: '../../runs/workspaces'
+  experiment_root: '../../runs/experiments'
+  python_executable: 'python'
+  remote_python_executable: 'python'
+code:
+  entrypoint: '../../local_remote_simulator/scripts/mock_train.py'
+  working_dir: '../../local_remote_simulator'
+  args: []
+  package_include:
+    - 'scripts/mock_train.py'
+    - 'datasets/augmentation_policy_fixture/**'
+  package_exclude: []
+train:
+  args:
+    - '--epochs'
+    - '1'
+    - '--model'
+    - 'augmentation_policy_smoke'
+    - '--dataset'
+    - 'augmentation_policy_fixture'
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+  - id: 'augmentation_policy_fixture'
+    kind: 'original'
+    path: '../../local_remote_simulator/datasets/augmentation_policy_fixture'
+    enabled: true
+  - id: 'augmentation_policy_train'
+    kind: 'augmentation'
+    source: 'augmentation_policy_fixture'
+    enabled: true
+tasks:
+  - id: 'augment_train_policy_smoke'
+    task_type: 'augmentation'
+    input_variant: 'augmentation_policy_fixture'
+    adapter: 'augmentation_policy_smoke'
+    enabled: true
+    params:
+      target_split: 'train'
+      policy_id: 'noop_smoke_v1'
+      augmentation_recipe: 'noop_identity_v1'
+      label_transform: 'identity'
+      preserve_original_sample_id: true
+      preserve_split: true
+      record_augmentation_id: true
+      record_augmentation_recipe: true
+      record_label_transform: true
+output:
+  log_file: 'train.log'
+  metrics_file: 'metrics.csv'
+  checkpoint_file: 'best.pt'
+  status_file: 'status.marker'
+  summary_file: 'summary.md'
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+    - 'train.log'
+    - 'metrics.csv'
+    - 'metrics.json'
+    - 'status.marker'
+    - 'summary.md'
+    - 'experiment.json'
+    - 'artifacts.json'
+    - 'timings.csv'
+    - 'task_results.json'
+    - 'tasks/**/*.json'
+analysis:
+  primary_metric: 'accuracy'
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: '../../runs/augmentation_policy_experiments.sqlite3'

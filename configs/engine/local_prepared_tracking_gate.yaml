@@ -1,0 +1,88 @@
+schema_version: '0.1'
+experiment:
+  name: local_prepared_tracking_gate
+  description: Local prepared tracking skeleton gate. Detection smoke produces the
+    upstream prediction artifact, then BoT-SORT fails closed with contract metadata.
+  tags:
+  - local
+  - prepared-gate
+  - tracking
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/mock_train.py
+  - datasets/adapter_chain_fixture/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '1'
+  - --model
+  - prepared_tracking_gate
+  - --dataset
+  - adapter_chain_fixture
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: adapter_chain_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/adapter_chain_fixture
+  enabled: true
+tasks:
+- id: detect_fixture
+  task_type: detection
+  input_variant: adapter_chain_fixture
+  model_id: manifest_detection_smoke
+  adapter: manifest_detection_smoke
+  enabled: true
+  params:
+    default_class_id: tank
+    score: 0.95
+    batch_size: 8
+- id: gate_botsort_tracking
+  task_type: tracking
+  input_variant: adapter_chain_fixture
+  model_id: bot_sort
+  adapter: botsort_tracker
+  enabled: true
+  depends_on:
+  - detect_fixture
+  params:
+    execution_mode: inference_smoke
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/**/*.json
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/prepared_tracking_gate_experiments.sqlite3

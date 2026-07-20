@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.1",
+  "dataset_id": "tank_armor_prepared_v20260713_mbt_crop_aug_strong_operational_rotate_v2",
+  "remote_root": "/workspace/ironflow/prestaged/tank_armor_prepared_v20260713_mbt_crop_aug_strong_operational_rotate_v2",
+  "remote_crops": "/workspace/ironflow/prestaged/tank_armor_prepared_v20260713_mbt_crop_aug_strong_operational_rotate_v2/classifier_mbt/crops",
+  "current_queue": "smoke",
+  "smoke_configs": [
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2_smoke/01_mbt_strong_a_v2_c1_efficientnet_v2_s_class_weighted_ce_smoke.yaml",
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2_smoke/02_mbt_strong_a_v2_c6_swin_tiny_layerwise_lr_decay_smoke.yaml",
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2_smoke/03_mbt_strong_a_v2_c7_convnext_v2_tiny_focal_loss_smoke.yaml"
+  ],
+  "full_configs": [
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2/01_mbt_strong_a_v2_c1_efficientnet_v2_s_class_weighted_ce.yaml",
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2/02_mbt_strong_a_v2_c6_swin_tiny_layerwise_lr_decay.yaml",
+    "configs/engine/classifier_refinement_2_10_mbt_strong_a_v2/03_mbt_strong_a_v2_c7_convnext_v2_tiny_focal_loss.yaml"
+  ],
+  "smoke_queue": "runs/gui_queue/mbt_strong_a_v2_smoke_queue.json",
+  "full_queue": "runs/gui_queue/mbt_strong_a_v2_full_queue.json"
+}

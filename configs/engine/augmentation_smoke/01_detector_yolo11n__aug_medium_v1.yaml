@@ -1,0 +1,123 @@
+schema_version: '0.1'
+experiment:
+  name: smoke_aug_recommended_detector_yolo11n_medium_v1
+  description: Train and evaluate YOLO11n as a detector-only baseline on the fixed
+    detection split. | Augmented dataset policy=medium_v1
+  tags:
+  - detector_only
+  - detector_screening
+  - gpu-balanced
+  - recommended_matrix
+  - ssh
+  - augmentation_ablation
+  - aug_medium_v1
+  - materialized_augmented_dataset
+runtime:
+  runner: ssh
+  workspace: ../../../runs/w
+  experiment_root: ../../../runs/e
+  python_executable: python
+  remote_python_executable: auto
+  container_mode: native_python
+  container_image: ''
+code:
+  entrypoint: ../../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - scripts/external_wrapper_common.py
+  - scripts/external_detection_wrappers/**
+  - scripts/external_segmentation_wrappers/**
+  - scripts/external_embedding_wrappers/**
+  - models/checkpoints/pretrained/ultralytics/yolo11n.pt
+  - src/**
+  - runs/user_datasets/tank_armor_prepared_v20260630/detector_tank_av/detection/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 14400
+  fail_fast: true
+data_variants:
+- id: model_name_detection
+  kind: original
+  source: null
+  path: ../../../runs/user_datasets/tank_armor_prepared_v20260630_aug/medium_v1/detector_tank_av/detection
+  enabled: true
+  params:
+    augmentation_policy: medium_v1
+    augmentation_materialization: train_augmented_val_test_original
+tasks:
+- id: train_detect_yolo11n
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: yolo11n
+  adapter: ultralytics_yolo
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 640
+    patience: 5
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 16
+    workers: 2
+    checkpoint: models/checkpoints/pretrained/ultralytics/yolo11n.pt
+- id: predict_detect_yolo11n
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: yolo11n
+  adapter: ultralytics_yolo
+  enabled: true
+  depends_on:
+  - train_detect_yolo11n
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 640
+    patience: 5
+    checkpoint_from_task_id: train_detect_yolo11n
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 16
+    workers: 2
+    allow_synthetic_smoke_detection: true
+    fallback_class_id: object
+    prediction_split: test
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  artifact_collection_mode: light
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: map50
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../../runs/recommended_detector_yolo11n_experiments_medium_v1.sqlite3

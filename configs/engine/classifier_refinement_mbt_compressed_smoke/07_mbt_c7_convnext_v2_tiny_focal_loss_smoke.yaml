@@ -1,0 +1,147 @@
+schema_version: '0.1'
+experiment:
+  name: exp_refine_mbt_c7_smoke_convnext_v2_tiny_focal_loss
+  description: 'MBT-C7 smoke: convnext_v2_tiny with focal loss gamma 2.0.'
+  tags:
+  - mbt_compressed_refinement
+  - c7
+  - focal_loss
+  id: exp_refine_mbt_c7_smoke_convnext_v2_tiny_focal_loss
+runtime:
+  runner: ssh
+  workspace: runs\w
+  experiment_root: runs\e
+  python_executable: python
+  remote_python_executable: auto
+  container_mode: native_python
+  container_image: ''
+code:
+  entrypoint: src\ironflow_exp\engine\remote_task_adapter.py
+  working_dir: .
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - scripts/external_wrapper_common.py
+  - scripts/external_detection_wrappers/**
+  - scripts/external_segmentation_wrappers/**
+  - scripts/external_embedding_wrappers/**
+  - models/checkpoints/pretrained/timm/convnext_v2_tiny_pretrained.pt
+  - src/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 21600
+  fail_fast: true
+data_variants:
+- id: model_name_classification_crops
+  kind: original
+  source: null
+  path: /workspace/ironflow/prestaged/tank_armor_prepared_v20260630_aug_weak_v1/classifier_mbt/crops
+  enabled: true
+  params: {}
+tasks:
+- id: train_classify_convnext_v2_tiny
+  task_type: classification
+  input_variant: model_name_classification_crops
+  model_id: convnext_v2_tiny
+  adapter: timm_classifier
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 384
+    top_k: 3
+    best_metric: macro_f1
+    early_stopping_metric: macro_f1
+    early_stopping_patience: 2
+    early_stopping_min_delta: 0.0
+    patience: 2
+    device: cuda:0
+    external_timeout_seconds: 3600
+    epochs: 3
+    batch_size: 24
+    workers: 4
+    learning_rate: 5.0e-05
+    scheduler: cosine
+    min_learning_rate: 1.0e-06
+    checkpoint: models/checkpoints/pretrained/timm/convnext_v2_tiny_pretrained.pt
+    loss: focal_loss
+    focal_gamma: 2.0
+- id: predict_classify_convnext_v2_tiny
+  task_type: classification
+  input_variant: model_name_classification_crops
+  model_id: convnext_v2_tiny
+  adapter: timm_classifier
+  enabled: true
+  depends_on:
+  - train_classify_convnext_v2_tiny
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 384
+    top_k: 3
+    best_metric: macro_f1
+    early_stopping_metric: macro_f1
+    early_stopping_patience: 2
+    early_stopping_min_delta: 0.0
+    patience: 2
+    device: cuda:0
+    external_timeout_seconds: 3600
+    epochs: 3
+    batch_size: 24
+    workers: 4
+    learning_rate: 5.0e-05
+    scheduler: cosine
+    min_learning_rate: 1.0e-06
+    checkpoint_from_task_id: train_classify_convnext_v2_tiny
+    prediction_split: test
+    loss: focal_loss
+    focal_gamma: 2.0
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: true
+  artifact_collection_mode: full
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/*/task.json
+  - tasks/*/task.log
+  - tasks/*/metrics.csv
+  - tasks/*/metrics.json
+  - tasks/*/metrics/*.csv
+  - tasks/*/status.marker
+  - tasks/*/summary.md
+  - tasks/*/timings.csv
+  - tasks/*/predictions.json
+  - tasks/*/artifacts.json
+  - tasks/*/predictions/*.json
+  - tasks/*/classification_input_manifest.json
+  - tasks/*/augmentation_manifest.json
+  - tasks/*/checkpoints/best.pt
+  - tasks/*/checkpoints/*/weights/best.pt
+analysis:
+  primary_metric: macro_f1
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: runs\exp_refine_2_8_mbt_current_weak_classifier_convnext_v2_tiny_img384_experiments.sqlite3

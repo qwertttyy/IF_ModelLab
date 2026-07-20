@@ -1,0 +1,75 @@
+schema_version: '0.1'
+experiment:
+  name: 'local_prepared_embedding_gate'
+  description: 'Local prepared embedding skeleton gate. Expected to fail closed with vector-output contract metadata.'
+  tags:
+    - 'local'
+    - 'prepared-gate'
+    - 'embedding'
+runtime:
+  runner: 'local_simulator'
+  workspace: '../../runs/workspaces'
+  experiment_root: '../../runs/experiments'
+  python_executable: 'python'
+  remote_python_executable: 'python'
+code:
+  entrypoint: '../../local_remote_simulator/scripts/mock_train.py'
+  working_dir: '../../local_remote_simulator'
+  args: []
+  package_include:
+    - 'scripts/mock_train.py'
+    - 'datasets/adapter_chain_fixture/**'
+  package_exclude: []
+train:
+  args:
+    - '--epochs'
+    - '1'
+    - '--model'
+    - 'prepared_embedding_gate'
+    - '--dataset'
+    - 'adapter_chain_fixture'
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+  - id: 'adapter_chain_fixture'
+    kind: 'original'
+    path: '../../local_remote_simulator/datasets/adapter_chain_fixture'
+    enabled: true
+tasks:
+  - id: 'gate_dinov2_embedding'
+    task_type: 'embedding'
+    input_variant: 'adapter_chain_fixture'
+    model_id: 'dinov2_vits14'
+    adapter: 'dinov2_embedding'
+    enabled: true
+    params:
+      execution_mode: 'inference_smoke'
+output:
+  log_file: 'train.log'
+  metrics_file: 'metrics.csv'
+  checkpoint_file: 'best.pt'
+  status_file: 'status.marker'
+  summary_file: 'summary.md'
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+    - 'train.log'
+    - 'metrics.csv'
+    - 'metrics.json'
+    - 'status.marker'
+    - 'summary.md'
+    - 'experiment.json'
+    - 'artifacts.json'
+    - 'timings.csv'
+    - 'task_results.json'
+    - 'tasks/**/*.json'
+analysis:
+  primary_metric: 'accuracy'
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: '../../runs/prepared_embedding_gate_experiments.sqlite3'

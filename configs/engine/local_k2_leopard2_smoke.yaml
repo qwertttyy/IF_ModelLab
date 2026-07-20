@@ -1,0 +1,90 @@
+schema_version: '0.1'
+experiment:
+  name: local_k2_leopard2_smoke
+  description: Local CPU-only K2 vs Leopard 2 user-image smoke. This is a label-aware
+    contract smoke, not a production visual classifier.
+  tags:
+  - local
+  - test-model
+  - cpu-only
+  - user-images
+  - k2-leopard2
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/test_model_smoke.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/test_model_smoke.py
+  - test_models/k2_leopard2_smoke_rule_v1/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '3'
+  - --dataset-dir
+  - ../runs/user_datasets/k2_vs_leopard2_smoke
+  - --model-dir
+  - test_models/k2_leopard2_smoke_rule_v1
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: k2_vs_leopard2_smoke
+  kind: original
+  path: ../../runs/user_datasets/k2_vs_leopard2_smoke
+  enabled: true
+tasks:
+- id: classify_k2_leopard2_smoke
+  task_type: classification
+  input_variant: k2_vs_leopard2_smoke
+  model_id: k2_leopard2_smoke_rule_v1
+  adapter: test_model_smoke
+  enabled: true
+  params:
+    source: user_image_folder
+    batch_size: 32
+- id: detect_k2_leopard2_smoke
+  task_type: detection
+  input_variant: k2_vs_leopard2_smoke
+  model_id: k2_leopard2_smoke_rule_v1
+  adapter: test_model_smoke
+  enabled: true
+  params:
+    source: user_image_folder
+    batch_size: 8
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - model_snapshot.json
+  - timings.csv
+  - task_results.json
+  - predictions/*.json
+  - previews/samples/*
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/k2_leopard2_experiments.sqlite3

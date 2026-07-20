@@ -1,0 +1,83 @@
+schema_version: '0.1'
+experiment:
+  name: gpu_timm_classification_m1a2_smoke
+  description: Remote GPU timm classification train smoke on imported M1a2 export
+    data.
+  tags:
+  - ssh
+  - gpu
+  - classification
+  - timm
+  - train
+  - m1a2
+runtime:
+  runner: ssh
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python3
+code:
+  entrypoint: ../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - src/**
+  - runs/user_datasets/export_20260615_224531/classification/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 900
+  fail_fast: true
+data_variants:
+- id: m1a2_classification
+  kind: original
+  path: ../../runs/user_datasets/export_20260615_224531/classification
+  enabled: true
+tasks:
+- id: train_timm_classifier
+  task_type: classification
+  input_variant: m1a2_classification
+  model_id: convnext_v2_tiny
+  adapter: timm_classifier
+  enabled: true
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: true
+    epochs: 3
+    image_size: 224
+    batch_size: 32
+    learning_rate: 0.001
+    device: cuda:0
+    workers: 2
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/gpu_timm_classification_m1a2_experiments.sqlite3

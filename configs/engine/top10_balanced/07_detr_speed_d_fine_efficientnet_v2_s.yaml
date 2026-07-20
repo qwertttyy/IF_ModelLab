@@ -1,0 +1,208 @@
+﻿schema_version: '0.1'
+experiment:
+  name: recommended_detr_speed_d_fine_efficientnet_v2_s
+  description: Benchmark D-FINE as the real-time DETR-family detector against YOLO
+    and RF-DETR.
+  tags:
+  - end_to_end
+  - foundation_top10
+  - gpu-balanced
+  - recommended_matrix
+  - ssh
+runtime:
+  runner: ssh
+  workspace: ../../../runs/w
+  experiment_root: ../../../runs/e
+  python_executable: python
+  remote_python_executable: auto
+  container_mode: native_python
+  container_image: ''
+code:
+  entrypoint: ../../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - scripts/external_wrapper_common.py
+  - scripts/external_detection_wrappers/**
+  - scripts/external_segmentation_wrappers/**
+  - scripts/external_embedding_wrappers/**
+  - models/checkpoints/pretrained/d_fine/dfine_hgnetv2_n_coco.pth
+  - models/checkpoints/pretrained/torchvision/efficientnet_v2_s_imagenet.pt
+  - src/**
+  - runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/detector_tank_av/detection/**
+  - runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/classifier_all/images/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 14400
+  fail_fast: true
+data_variants:
+- id: model_name_detection
+  kind: original
+  source: null
+  path: ../../../runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/detector_tank_av/detection
+  enabled: true
+  params: {}
+- id: model_name_detector_crop
+  kind: detector_crop
+  source: model_name_detection
+  path: null
+  enabled: true
+  params: {}
+- id: model_name_classification_images
+  kind: original
+  source: null
+  path: ../../../runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/classifier_all/images
+  enabled: true
+  params: {}
+tasks:
+- id: train_detect_d_fine
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: d_fine
+  adapter: d_fine_detection
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 640
+    patience: 5
+    external_train_command: python scripts/external_detection_wrappers/d_fine_detection_wrapper.py
+      --request "{request_json}"
+    external_inference_command: python scripts/external_detection_wrappers/d_fine_detection_wrapper.py
+      --request "{request_json}"
+    external_command_contract_mode: native
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 8
+    d_fine_repo_dir: /workspace/D-FINE
+    d_fine_config: /workspace/D-FINE/configs/dfine/dfine_hgnetv2_n_coco.yml
+    checkpoint: models/checkpoints/pretrained/d_fine/dfine_hgnetv2_n_coco.pth
+- id: predict_detect_d_fine
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: d_fine
+  adapter: d_fine_detection
+  enabled: true
+  depends_on:
+  - train_detect_d_fine
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 640
+    patience: 5
+    external_train_command: python scripts/external_detection_wrappers/d_fine_detection_wrapper.py
+      --request "{request_json}"
+    external_inference_command: python scripts/external_detection_wrappers/d_fine_detection_wrapper.py
+      --request "{request_json}"
+    external_command_contract_mode: native
+    checkpoint_from_task_id: train_detect_d_fine
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 8
+    d_fine_repo_dir: /workspace/D-FINE
+    d_fine_config: /workspace/D-FINE/configs/dfine/dfine_hgnetv2_n_coco.yml
+    prediction_split: test
+- id: make_model_name_detector_crops
+  task_type: preprocessing
+  input_variant: model_name_detection
+  model_id: null
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - predict_detect_d_fine
+  params:
+    source_task_id: predict_detect_d_fine
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.08
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: model_name_detector_crops
+    pretrained: true
+    allow_pretrained_download: true
+    device: cuda:0
+    external_timeout_seconds: 14400
+- id: train_classify_efficientnet_v2_s
+  task_type: classification
+  input_variant: model_name_classification_images
+  model_id: efficientnet_v2_s
+  adapter: torchvision_classifier
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 224
+    top_k: 3
+    early_stopping_patience: 5
+    early_stopping_min_delta: 0.0
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 32
+    learning_rate: 0.001
+    scheduler: cosine
+    min_learning_rate: 1.0e-05
+    checkpoint: models/checkpoints/pretrained/torchvision/efficientnet_v2_s_imagenet.pt
+- id: predict_classify_efficientnet_v2_s
+  task_type: classification
+  input_variant: model_name_detector_crop
+  model_id: efficientnet_v2_s
+  adapter: torchvision_classifier
+  enabled: true
+  depends_on:
+  - make_model_name_detector_crops
+  - train_classify_efficientnet_v2_s
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 224
+    top_k: 3
+    early_stopping_patience: 5
+    early_stopping_min_delta: 0.0
+    checkpoint_from_task_id: train_classify_efficientnet_v2_s
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 32
+    prediction_split: test
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  artifact_collection_mode: light
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../../runs/recommended_detr_speed_d_fine_efficientnet_v2_s_experiments.sqlite3

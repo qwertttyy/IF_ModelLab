@@ -1,0 +1,78 @@
+schema_version: '0.1'
+experiment:
+  name: 'local_segmentation_smoke'
+  description: 'Local manifest-based segmentation prediction contract smoke.'
+  tags:
+    - 'local'
+    - 'segmentation'
+    - 'manifest'
+    - 'contract-smoke'
+runtime:
+  runner: 'local_simulator'
+  workspace: '../../runs/workspaces'
+  experiment_root: '../../runs/experiments'
+  python_executable: 'python'
+  remote_python_executable: 'python'
+code:
+  entrypoint: '../../local_remote_simulator/scripts/mock_train.py'
+  working_dir: '../../local_remote_simulator'
+  args: []
+  package_include:
+    - 'scripts/mock_train.py'
+    - 'datasets/adapter_chain_fixture/**'
+  package_exclude: []
+train:
+  args:
+    - '--epochs'
+    - '1'
+    - '--model'
+    - 'segmentation_smoke'
+    - '--dataset'
+    - 'adapter_chain_fixture'
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+  - id: 'adapter_chain_fixture'
+    kind: 'original'
+    path: '../../local_remote_simulator/datasets/adapter_chain_fixture'
+    enabled: true
+tasks:
+  - id: 'segment_fixture'
+    task_type: 'segmentation'
+    input_variant: 'adapter_chain_fixture'
+    adapter: 'manifest_segmentation_smoke'
+    enabled: true
+    params:
+      default_class_id: 'tank'
+      score: 0.92
+      mask_kind: 'polygon'
+output:
+  log_file: 'train.log'
+  metrics_file: 'metrics.csv'
+  checkpoint_file: 'best.pt'
+  status_file: 'status.marker'
+  summary_file: 'summary.md'
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+    - 'train.log'
+    - 'metrics.csv'
+    - 'metrics.json'
+    - 'status.marker'
+    - 'summary.md'
+    - 'experiment.json'
+    - 'artifacts.json'
+    - 'timings.csv'
+    - 'task_results.json'
+    - 'tasks/**/*.json'
+    - 'tasks/**/predictions/segmentation_predictions.json'
+analysis:
+  primary_metric: 'map50'
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: '../../runs/segmentation_smoke_experiments.sqlite3'

@@ -1,0 +1,90 @@
+﻿schema_version: '0.1'
+experiment:
+  name: vast_4090_yolo_detection_imported_20260617_smoke
+  description: Vast RTX 4090 one-epoch YOLO detection native execution smoke on the
+    imported 2026-06-17 model-name detection dataset.
+  tags:
+  - ssh
+  - gpu
+  - vast_4090
+  - detection
+  - yolo
+  - train
+  - native_smoke
+  - imported_20260617
+runtime:
+  runner: ssh
+  workspace: ../../runs/w
+  experiment_root: ../../runs/e
+  python_executable: python
+  remote_python_executable: /venv/main/bin/python
+code:
+  entrypoint: ../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - src/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 1800
+  fail_fast: true
+data_variants:
+- id: imported_20260617_combined_model_name_detection
+  kind: original
+  path: ../../runs/user_datasets/tank_armor_prepared_v20260630/detector_tank_av/detection
+  enabled: true
+  params:
+    remote_path: /workspace/ironflow/datasets/imported_20260617/combined_model_name_detection/detection
+tasks:
+- id: train_yolo11n_model_name_detector_smoke
+  task_type: detection
+  input_variant: imported_20260617_combined_model_name_detection
+  model_id: yolo11n
+  adapter: ultralytics_yolo
+  enabled: true
+  params:
+    execution_mode: train
+    pretrained: true
+    checkpoint: /workspace/ironflow/models/checkpoints/pretrained/ultralytics/yolo11n.pt
+    allow_pretrained_download: false
+    epochs: 1
+    image_size: 320
+    batch_size: 16
+    learning_rate: 0.001
+    device: '0'
+    workers: 2
+    patience: 3
+    seed: 42
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  artifact_collection_mode: light
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: map50
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/vast_4090_yolo_detection_imported_20260617_smoke.sqlite3

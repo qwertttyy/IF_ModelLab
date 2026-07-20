@@ -1,0 +1,103 @@
+schema_version: '0.1'
+experiment:
+  name: local_mock_smoke
+  description: Local-first engine smoke configuration for the mock training flow.
+  tags:
+  - local
+  - mock
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator/scripts
+  args: []
+train:
+  args:
+  - --epochs
+  - '2'
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: original
+  kind: original
+  path: ../../local_remote_simulator/datasets/original
+  enabled: true
+- id: crop_gt
+  kind: crop
+  source: original
+  path: ../../local_remote_simulator/datasets/crop_gt
+  enabled: true
+  params:
+    crop_source: gt_bbox
+    padding_ratio: 0.08
+- id: aug_high_conf
+  kind: augmentation
+  source: crop_gt
+  path: ../../local_remote_simulator/datasets/aug_high_conf
+  enabled: false
+  params:
+    target_split: train
+    policy_id: high_conf_default
+- id: segmentation_outputs
+  kind: segmentation
+  source: original
+  path: ../../local_remote_simulator/datasets/segmentation_outputs
+  enabled: false
+tasks:
+- id: detect_original
+  task_type: detection
+  input_variant: original
+  model_id: yolo11n
+  adapter: mock_detection_adapter
+  enabled: true
+  params:
+    image_size: 640
+    confidence_threshold: 0.25
+    batch_size: 8
+- id: classify_crop
+  task_type: classification
+  input_variant: crop_gt
+  model_id: mobilenet_v3_small
+  adapter: mock_classification_adapter
+  enabled: true
+  depends_on:
+  - detect_original
+  params:
+    image_size: 224
+    top_k: 5
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - best.pt
+  - last.pt
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - sample_predictions/*.json
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/ironflow_experiments.sqlite3

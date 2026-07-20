@@ -1,0 +1,10 @@
+server:
+  name: local
+  type: local
+  host: null
+  port: null
+  username: null
+  key_path: null
+  remote_workspace: null
+  gpu_name: null
+  total_vram: null

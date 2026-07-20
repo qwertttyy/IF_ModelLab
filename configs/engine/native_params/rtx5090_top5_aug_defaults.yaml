@@ -1,0 +1,125 @@
+﻿# RTX 5090 32GB balanced native-wrapper params for team distribution.
+#
+# Merge order:
+# defaults -> by_task_type -> by_adapter -> by_model_id -> by_task_id/tasks.
+# More specific sections override earlier sections.
+#
+# These are IronFlow balanced experiment defaults, not official vendor/library
+# defaults. They are tuned for a single RTX 5090 32GB Vast instance: meaningful
+# top5 augmentation runs with fixed epochs/patience for comparison.
+
+defaults:
+  pretrained: true
+  allow_pretrained_download: true
+  device: cuda:0
+  external_timeout_seconds: 14400
+
+by_task_type:
+  detection:
+    epochs: 30
+    batch_size: 8
+    image_size: 640
+    patience: 5
+  classification:
+    epochs: 50
+    batch_size: 32
+    image_size: 224
+    early_stopping_patience: 8
+    early_stopping_min_delta: 0.0
+  segmentation:
+    image_size: 1024
+  embedding:
+    image_size: 224
+    batch_size: 16
+
+by_adapter:
+  ultralytics_yolo:
+    batch_size: 16
+    # Vast/Jupyter-style containers can leave PyTorch dataloader workers stuck
+    # after Ultralytics train/val. Keep team defaults conservative.
+    workers: 2
+  ultralytics_yolo_classifier:
+    batch_size: 32
+    workers: 2
+  torchvision_classifier:
+    learning_rate: 0.001
+    scheduler: cosine
+    min_learning_rate: 0.00001
+  timm_classifier:
+    learning_rate: 0.001
+    scheduler: cosine
+    min_learning_rate: 0.00001
+  rf_detr_detection:
+    rf_detr_model_class: RFDETRBase
+    batch_size: 8
+    num_workers: 4
+  d_fine_detection:
+    d_fine_repo_dir: /workspace/D-FINE
+    d_fine_config: /workspace/D-FINE/configs/dfine/dfine_hgnetv2_n_coco.yml
+    batch_size: 8
+  rt_detr_detection:
+    batch_size: 8
+    workers: 4
+    amp: true
+  rt_detr_v2_detection:
+    hf_model_id: PekingU/rtdetr_v2_r18vd
+    num_workers: 4
+    batch_size: 8
+    amp: true
+  lw_detr_detection:
+    hf_model_id: AnnaZhang/lwdetr_small_60e_coco
+    num_workers: 4
+    batch_size: 8
+    amp: true
+  sam_promptable_segmentation:
+    sam2_hf_model_id: facebook/sam2-hiera-large
+  dinov3_embedding:
+    dinov3_repo_dir: /workspace/dinov3
+    dino_hub_model: dinov3_vits16
+    dino_pretrained: true
+    # If the public DINOv3 weight URL is blocked, place the checkpoint on the
+    # GPU server and uncomment/set this path before real pretrained runs.
+    # dinov3_weights: /workspace/ironflow/models/checkpoints/pretrained/dinov3/dinov3_vits16_pretrain_lvd1689m-08c60483.pth
+  clip_embedding:
+    openclip_model_name: ViT-B-32
+    openclip_pretrained: laion2b_s34b_b79k
+  siglip_embedding:
+    openclip_model_name: ViT-SO400M-14-SigLIP-384
+    openclip_pretrained: webli
+
+by_model_id:
+  efficientnet_b3:
+    learning_rate: 0.0005
+    scheduler: cosine
+    min_learning_rate: 0.000001
+    early_stopping_patience: 10
+    patience: 10
+  efficientnet_b0:
+    learning_rate: 0.0007
+    scheduler: cosine
+    min_learning_rate: 0.00001
+    early_stopping_patience: 10
+    patience: 10
+  mobilenet_v3_large:
+    learning_rate: 0.0008
+    scheduler: cosine
+    min_learning_rate: 0.00001
+    early_stopping_patience: 10
+    patience: 10
+  efficientnet_v2_s:
+    learning_rate: 0.0003
+    scheduler: cosine
+    min_learning_rate: 0.000001
+    early_stopping_patience: 10
+    patience: 10
+  resnet50:
+    learning_rate: 0.0005
+    scheduler: cosine
+    min_learning_rate: 0.00001
+    early_stopping_patience: 10
+    patience: 10
+  sam2:
+    sam2_hf_model_id: facebook/sam2-hiera-large
+  openclip_vit_b_32:
+    openclip_model_name: ViT-B-32
+    openclip_pretrained: laion2b_s34b_b79k

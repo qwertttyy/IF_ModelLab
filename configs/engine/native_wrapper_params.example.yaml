@@ -1,0 +1,55 @@
+# Optional GPU native-wrapper params for the GPU / WSL tab.
+#
+# Merge order:
+# defaults -> by_task_type -> by_adapter -> by_model_id -> by_task_id/tasks.
+# More specific sections override earlier sections.
+
+defaults:
+  pretrained: true
+  allow_pretrained_download: true
+  device: cuda:0
+  external_timeout_seconds: 7200
+
+by_task_type:
+  detection:
+    batch_size: 4
+    epochs: 3
+    image_size: 640
+  segmentation:
+    image_size: 1024
+  embedding:
+    image_size: 224
+    batch_size: 16
+
+by_adapter:
+  rf_detr_detection:
+    rf_detr_model_class: RFDETRBase
+  d_fine_detection:
+    d_fine_repo_dir: /workspace/D-FINE
+    d_fine_config: /workspace/D-FINE/configs/dfine/dfine_hgnetv2_n_coco.yml
+  sam_promptable_segmentation:
+    sam2_hf_model_id: facebook/sam2-hiera-large
+  dinov3_embedding:
+    dinov3_repo_dir: /workspace/dinov3
+    dino_hub_model: dinov3_vits16
+    dino_pretrained: true
+    # If the public DINOv3 weight URL is blocked, place the checkpoint on the
+    # GPU server and uncomment/set this path before real pretrained runs.
+    # dinov3_weights: /workspace/ironflow/models/checkpoints/pretrained/dinov3/dinov3_vits16_pretrain_lvd1689m-08c60483.pth
+  clip_embedding:
+    openclip_model_name: ViT-B-32
+    openclip_pretrained: laion2b_s34b_b79k
+  siglip_embedding:
+    openclip_model_name: ViT-SO400M-14-SigLIP-384
+    openclip_pretrained: webli
+
+by_model_id:
+  sam2:
+    sam2_hf_model_id: facebook/sam2-hiera-large
+  openclip_vit_b_32:
+    openclip_model_name: ViT-B-32
+    openclip_pretrained: laion2b_s34b_b79k
+
+by_task_id:
+  train_detect_d_fine:
+    epochs: 1

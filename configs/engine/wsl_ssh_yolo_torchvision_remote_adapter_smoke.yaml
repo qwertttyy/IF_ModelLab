@@ -1,0 +1,115 @@
+schema_version: '0.1'
+experiment:
+  name: wsl_ssh_yolo_torchvision_remote_adapter_smoke
+  description: WSL SSH remote task-adapter execution for YOLO -> crop -> Torchvision
+    smoke chain.
+  tags:
+  - ssh
+  - wsl
+  - adapter-chain
+  - ultralytics
+  - yolo
+  - torchvision
+  - real-adapter-smoke
+  - remote-task-adapter
+runtime:
+  runner: ssh
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python3
+code:
+  entrypoint: ../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - src/**
+  - local_remote_simulator/datasets/adapter_chain_fixture/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: adapter_chain_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/adapter_chain_fixture
+  enabled: true
+- id: adapter_chain_detector_crop
+  kind: detector_crop
+  source: adapter_chain_fixture
+  enabled: true
+tasks:
+- id: detect_fixture_yolo
+  task_type: detection
+  input_variant: adapter_chain_fixture
+  model_id: yolo11n
+  adapter: ultralytics_yolo
+  enabled: true
+  params:
+    execution_mode: inference_smoke
+    pretrained: false
+    image_size: 32
+    allow_synthetic_smoke_detection: true
+    fallback_class_id: tank
+    batch_size: 16
+- id: make_detector_crops
+  task_type: preprocessing
+  input_variant: adapter_chain_fixture
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - detect_fixture_yolo
+  params:
+    source_task_id: detect_fixture_yolo
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.0
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: adapter_chain_yolo_detector_crops
+- id: classify_yolo_detector_crops_torchvision
+  task_type: classification
+  input_variant: adapter_chain_detector_crop
+  model_id: mobilenet_v3_small
+  adapter: torchvision_classifier
+  enabled: true
+  depends_on:
+  - make_detector_crops
+  params:
+    execution_mode: inference_smoke
+    pretrained: false
+    image_size: 224
+    top_k: 2
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/wsl_ssh_yolo_torchvision_remote_adapter_experiments.sqlite3

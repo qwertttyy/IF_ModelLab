@@ -1,0 +1,133 @@
+schema_version: '0.1'
+experiment:
+  name: local_classification_crop_augmentation_smoke
+  description: Local detection -> crop -> train-only crop augmentation -> classification
+    smoke.
+  tags:
+  - local
+  - adapter-chain
+  - augmentation
+  - classification
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/mock_train.py
+  - datasets/augmentation_policy_fixture/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '1'
+  - --model
+  - classification_crop_augmentation_smoke
+  - --dataset
+  - augmentation_policy_fixture
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: augmentation_policy_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/augmentation_policy_fixture
+  enabled: true
+- id: augmentation_detector_crop
+  kind: detector_crop
+  source: augmentation_policy_fixture
+  enabled: true
+- id: augmentation_augmented_detector_crop
+  kind: detector_crop
+  source: augmentation_detector_crop
+  enabled: true
+tasks:
+- id: detect_fixture
+  task_type: detection
+  input_variant: augmentation_policy_fixture
+  model_id: manifest_detection_smoke
+  adapter: manifest_detection_smoke
+  enabled: true
+  params:
+    default_class_id: tank
+    score: 0.95
+    batch_size: 8
+- id: make_detector_crops
+  task_type: preprocessing
+  input_variant: augmentation_policy_fixture
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - detect_fixture
+  params:
+    source_task_id: detect_fixture
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.0
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: augmentation_detector_crops
+- id: augment_detector_crops
+  task_type: augmentation
+  input_variant: augmentation_detector_crop
+  adapter: classification_crop_augmentation_smoke
+  enabled: true
+  depends_on:
+  - make_detector_crops
+  params:
+    target_split: train
+    policy_id: classification_crop_flip_smoke_v1
+    augmentation_recipe: horizontal_flip_smoke_v1
+    label_transform: preserve_class_label
+    preserve_original_sample_id: true
+    preserve_split: true
+    record_augmentation_id: true
+    record_augmentation_recipe: true
+    record_label_transform: true
+- id: classify_augmented_detector_crops
+  task_type: classification
+  input_variant: augmentation_augmented_detector_crop
+  model_id: manifest_classification_smoke
+  adapter: manifest_classification_smoke
+  enabled: true
+  depends_on:
+  - augment_detector_crops
+  params:
+    fallback_class_id: k2
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/**/*.json
+  - tasks/**/crops/**/*
+  - tasks/**/inputs/crops/**/*
+  - tasks/**/augmented_crops/**/*
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/classification_crop_augmentation_experiments.sqlite3

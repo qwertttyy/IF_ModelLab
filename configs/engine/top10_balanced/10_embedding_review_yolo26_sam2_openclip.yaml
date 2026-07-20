@@ -1,0 +1,187 @@
+﻿schema_version: '0.1'
+experiment:
+  name: recommended_embedding_review_yolo26_sam2_openclip
+  description: Use YOLO26 detections with SAM2 masks and OpenCLIP embeddings for visual
+    similarity review.
+  tags:
+  - foundation_top10
+  - gpu-balanced
+  - recommended_matrix
+  - review_path
+  - ssh
+runtime:
+  runner: ssh
+  workspace: ../../../runs/w
+  experiment_root: ../../../runs/e
+  python_executable: python
+  remote_python_executable: auto
+  container_mode: native_python
+  container_image: ''
+code:
+  entrypoint: ../../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - scripts/external_wrapper_common.py
+  - scripts/external_detection_wrappers/**
+  - scripts/external_segmentation_wrappers/**
+  - scripts/external_embedding_wrappers/**
+  - models/checkpoints/pretrained/ultralytics/yolo26n.pt
+  - src/**
+  - runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/detector_tank_av/detection/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 14400
+  fail_fast: true
+data_variants:
+- id: model_name_detection
+  kind: original
+  source: null
+  path: ../../../runs/user_datasets/tank_armor_prepared_v20260703_original_classifier_all_v1/detector_tank_av/detection
+  enabled: true
+  params: {}
+- id: model_name_detector_crop
+  kind: detector_crop
+  source: model_name_detection
+  path: null
+  enabled: true
+  params: {}
+tasks:
+- id: train_detect_yolo26n
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: yolo26n
+  adapter: ultralytics_yolo
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 640
+    patience: 5
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 16
+    workers: 2
+    checkpoint: models/checkpoints/pretrained/ultralytics/yolo26n.pt
+- id: predict_detect_yolo26n
+  task_type: detection
+  input_variant: model_name_detection
+  model_id: yolo26n
+  adapter: ultralytics_yolo
+  enabled: true
+  depends_on:
+  - train_detect_yolo26n
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 640
+    patience: 5
+    checkpoint_from_task_id: train_detect_yolo26n
+    device: cuda:0
+    external_timeout_seconds: 14400
+    epochs: 30
+    batch_size: 16
+    workers: 2
+    allow_synthetic_smoke_detection: true
+    fallback_class_id: object
+    prediction_split: test
+- id: make_model_name_detector_crops
+  task_type: preprocessing
+  input_variant: model_name_detection
+  model_id: null
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - predict_detect_yolo26n
+  params:
+    source_task_id: predict_detect_yolo26n
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.08
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: model_name_detector_crops
+    pretrained: true
+    allow_pretrained_download: true
+    device: cuda:0
+    external_timeout_seconds: 14400
+- id: segmentation_sam2
+  task_type: segmentation
+  input_variant: model_name_detection
+  model_id: sam2
+  adapter: sam_promptable_segmentation
+  enabled: true
+  depends_on:
+  - predict_detect_yolo26n
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 1024
+    external_inference_command: python scripts/external_segmentation_wrappers/sam_promptable_segmentation_wrapper.py
+      --request "{request_json}"
+    external_command_contract_mode: native
+    source_task_id: predict_detect_yolo26n
+    device: cuda:0
+    external_timeout_seconds: 14400
+    sam2_hf_model_id: facebook/sam2-hiera-large
+    prediction_split: test
+- id: embedding_openclip_vit_b_32
+  task_type: embedding
+  input_variant: model_name_detector_crop
+  model_id: openclip_vit_b_32
+  adapter: clip_embedding
+  enabled: true
+  depends_on:
+  - make_model_name_detector_crops
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 224
+    external_inference_command: python scripts/external_embedding_wrappers/clip_embedding_wrapper.py
+      --request "{request_json}"
+    external_command_contract_mode: native
+    device: cuda:0
+    external_timeout_seconds: 14400
+    batch_size: 16
+    openclip_model_name: ViT-B-32
+    openclip_pretrained: laion2b_s34b_b79k
+    prediction_split: test
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  artifact_collection_mode: light
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: review_hit_rate
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../../runs/recommended_embedding_review_yolo26_sam2_openclip_experiments.sqlite3

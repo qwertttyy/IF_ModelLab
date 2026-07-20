@@ -1,0 +1,109 @@
+schema_version: '0.1'
+experiment:
+  name: local_adapter_chain_smoke
+  description: Local detection -> crop transform -> classification adapter-chain smoke.
+  tags:
+  - local
+  - adapter-chain
+  - detection
+  - classification
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/mock_train.py
+  - datasets/adapter_chain_fixture/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '1'
+  - --model
+  - adapter_chain_smoke
+  - --dataset
+  - adapter_chain_fixture
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: adapter_chain_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/adapter_chain_fixture
+  enabled: true
+- id: adapter_chain_detector_crop
+  kind: detector_crop
+  source: adapter_chain_fixture
+  enabled: true
+tasks:
+- id: detect_fixture
+  task_type: detection
+  input_variant: adapter_chain_fixture
+  model_id: manifest_detection_smoke
+  adapter: manifest_detection_smoke
+  enabled: true
+  params:
+    default_class_id: tank
+    score: 0.95
+    batch_size: 8
+- id: make_detector_crops
+  task_type: preprocessing
+  input_variant: adapter_chain_fixture
+  adapter: detection_to_classification_crop
+  enabled: true
+  depends_on:
+  - detect_fixture
+  params:
+    source_task_id: detect_fixture
+    input_source: detector_crop
+    image_format: jpg
+    padding_ratio: 0.0
+    min_score: 0.0
+    use_source_labels: true
+    classification_dataset_id: adapter_chain_detector_crops
+- id: classify_detector_crops
+  task_type: classification
+  input_variant: adapter_chain_detector_crop
+  model_id: manifest_classification_smoke
+  adapter: manifest_classification_smoke
+  enabled: true
+  depends_on:
+  - make_detector_crops
+  params:
+    fallback_class_id: k2
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/**/*.json
+  - tasks/**/crops/**/*
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/adapter_chain_experiments.sqlite3

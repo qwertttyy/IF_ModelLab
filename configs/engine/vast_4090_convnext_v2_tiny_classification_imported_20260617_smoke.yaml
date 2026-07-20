@@ -1,0 +1,92 @@
+﻿schema_version: '0.1'
+experiment:
+  name: vast_4090_convnext_v2_tiny_classification_imported_20260617_smoke
+  description: Vast RTX 4090 one-epoch ConvNeXt V2 Tiny classification runtime validation
+    on imported 2026-06-17 crop classification data.
+  tags:
+  - ssh
+  - gpu
+  - vast_4090
+  - classification
+  - timm
+  - convnext_v2_tiny
+  - train
+  - native_smoke
+  - imported_20260617
+  - top10_p3
+runtime:
+  runner: ssh
+  workspace: ../../runs/w
+  experiment_root: ../../runs/e
+  python_executable: python
+  remote_python_executable: /venv/main/bin/python
+code:
+  entrypoint: ../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - src/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 1800
+  fail_fast: true
+data_variants:
+- id: imported_20260617_combined_model_name_classification_crops
+  kind: original
+  path: ../../runs/user_datasets/tank_armor_prepared_v20260630/classifier_mbt/crops
+  enabled: true
+  params:
+    remote_path: /workspace/ironflow/datasets/imported_20260617/combined_model_name_classification/crops
+tasks:
+- id: train_convnext_v2_tiny_model_name_classifier_smoke
+  task_type: classification
+  input_variant: imported_20260617_combined_model_name_classification_crops
+  model_id: convnext_v2_tiny
+  adapter: timm_classifier
+  enabled: true
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: true
+    epochs: 1
+    image_size: 224
+    batch_size: 32
+    learning_rate: 0.001
+    device: cuda:0
+    workers: 2
+    early_stopping_patience: 3
+    early_stopping_min_delta: 0.0
+    seed: 42
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  artifact_collection_mode: light
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/vast_4090_convnext_v2_tiny_classification_imported_20260617_smoke.sqlite3

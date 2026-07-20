@@ -1,0 +1,142 @@
+schema_version: '0.1'
+experiment:
+  name: exp_s1_1_mbt_classifier_mobilenet_v3_large
+  description: Stage 1-1 MBT classifier on original images. Model-specific optimized
+    config for mobilenet_v3_large.
+  tags:
+  - classifier_only
+  - classifier_model_specific
+  - stage_1_1
+  - mbt
+  - gpu-balanced
+  - ssh
+runtime:
+  runner: ssh
+  workspace: runs\w
+  experiment_root: runs\e
+  python_executable: python
+  remote_python_executable: auto
+  container_mode: native_python
+  container_image: ''
+code:
+  entrypoint: src\ironflow_exp\engine\remote_task_adapter.py
+  working_dir: .
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - scripts/external_wrapper_common.py
+  - scripts/external_detection_wrappers/**
+  - scripts/external_segmentation_wrappers/**
+  - scripts/external_embedding_wrappers/**
+  - models/checkpoints/pretrained/torchvision/mobilenet_v3_large_imagenet.pt
+  - src/**
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 21600
+  fail_fast: true
+data_variants:
+- id: model_name_classification_images
+  kind: original
+  source: null
+  path: /workspace/ironflow/prestaged/tank_armor_prepared_v20260706_original_split_mbt_av_v1/classifier_mbt/images
+  enabled: true
+  params: {}
+tasks:
+- id: train_classify_mobilenet_v3_large
+  task_type: classification
+  input_variant: model_name_classification_images
+  model_id: mobilenet_v3_large
+  adapter: torchvision_classifier
+  enabled: true
+  depends_on: []
+  params:
+    execution_mode: train
+    pretrained: true
+    allow_pretrained_download: false
+    image_size: 224
+    top_k: 3
+    early_stopping_patience: 12
+    early_stopping_min_delta: 0.0
+    patience: 12
+    device: cuda:0
+    external_timeout_seconds: 21600
+    epochs: 80
+    batch_size: 64
+    workers: 4
+    learning_rate: 0.001
+    scheduler: cosine
+    min_learning_rate: 1.0e-05
+    checkpoint: models/checkpoints/pretrained/torchvision/mobilenet_v3_large_imagenet.pt
+- id: predict_classify_mobilenet_v3_large
+  task_type: classification
+  input_variant: model_name_classification_images
+  model_id: mobilenet_v3_large
+  adapter: torchvision_classifier
+  enabled: true
+  depends_on:
+  - train_classify_mobilenet_v3_large
+  params:
+    execution_mode: inference_smoke
+    pretrained: true
+    allow_pretrained_download: true
+    image_size: 224
+    top_k: 3
+    early_stopping_patience: 12
+    early_stopping_min_delta: 0.0
+    patience: 12
+    device: cuda:0
+    external_timeout_seconds: 21600
+    epochs: 80
+    batch_size: 64
+    workers: 4
+    learning_rate: 0.001
+    scheduler: cosine
+    min_learning_rate: 1.0e-05
+    checkpoint_from_task_id: train_classify_mobilenet_v3_large
+    prediction_split: test
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: true
+  artifact_collection_mode: full
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/*/task.json
+  - tasks/*/task.log
+  - tasks/*/metrics.csv
+  - tasks/*/metrics.json
+  - tasks/*/metrics/*.csv
+  - tasks/*/status.marker
+  - tasks/*/summary.md
+  - tasks/*/timings.csv
+  - tasks/*/predictions.json
+  - tasks/*/artifacts.json
+  - tasks/*/predictions/*.json
+  - tasks/*/classification_input_manifest.json
+  - tasks/*/augmentation_manifest.json
+  - tasks/*/checkpoints/best.pt
+  - tasks/*/checkpoints/*/weights/best.pt
+analysis:
+  primary_metric: macro_f1
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: runs\exp_s1_1_mbt_classifier_mobilenet_v3_large_experiments.sqlite3

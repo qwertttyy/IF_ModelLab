@@ -1,0 +1,91 @@
+﻿schema_version: '0.1'
+experiment:
+  name: gpu_yolo26_model_name_detection_imported_20260617_train
+  description: Remote GPU YOLO26n fine-tuning on the imported 2026-06-17 dataset with
+    model-name detection classes and a prepared pretrained checkpoint.
+  tags:
+  - ssh
+  - gpu
+  - detection
+  - yolo26
+  - train
+  - real_train
+  - imported_20260617
+  - combined_model_name_detection
+  - model_name_classification
+  - pretrained_checkpoint
+runtime:
+  runner: ssh
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python3
+code:
+  entrypoint: ../../src/ironflow_exp/engine/remote_task_adapter.py
+  working_dir: ../..
+  args: []
+  package_include:
+  - pyproject.toml
+  - configs/model_catalog/**
+  - src/**
+  - runs/user_datasets/tank_armor_prepared_v20260630/detector_tank_av/detection/**
+  - models/checkpoints/pretrained/ultralytics/yolo26n.pt
+  package_exclude: []
+train:
+  args: []
+  env: {}
+  max_seconds: 10800
+  fail_fast: true
+data_variants:
+- id: imported_20260617_combined_model_name_detection
+  kind: original
+  path: ../../runs/user_datasets/tank_armor_prepared_v20260630/detector_tank_av/detection
+  enabled: true
+tasks:
+- id: train_yolo26_model_name_detector
+  task_type: detection
+  input_variant: imported_20260617_combined_model_name_detection
+  model_id: yolo26n
+  adapter: ultralytics_yolo
+  enabled: true
+  params:
+    execution_mode: train
+    pretrained: false
+    allow_pretrained_download: false
+    checkpoint: models/checkpoints/pretrained/ultralytics/yolo26n.pt
+    epochs: 30
+    image_size: 640
+    batch_size: 16
+    learning_rate: 0.001
+    device: '0'
+    workers: 2
+    patience: 10
+    seed: 42
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: true
+  save_previews: false
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/
+analysis:
+  primary_metric: map50
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/gpu_yolo26_model_name_detection_imported_20260617_experiments.sqlite3

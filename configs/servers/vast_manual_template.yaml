@@ -1,0 +1,10 @@
+server:
+  name: vast_manual_template
+  type: vast_manual
+  host: CHANGE_ME
+  port: 22
+  username: root
+  key_path: null
+  remote_workspace: /workspace/ironflow
+  gpu_name: CHANGE_ME
+  total_vram: CHANGE_ME

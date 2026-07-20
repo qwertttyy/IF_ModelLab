@@ -1,0 +1,10 @@
+server:
+  name: wsl_ubuntu
+  type: ssh
+  host: 127.0.0.1
+  port: 2222
+  username: CHANGE_ME
+  key_path: C:/Users/CHANGE_ME/.ssh/id_ed25519
+  remote_workspace: /home/CHANGE_ME/ironflow_remote
+  gpu_name: null
+  total_vram: null

@@ -1,0 +1,2684 @@
+specs:
+  - task: detection
+    model_id: yolo11n
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO11n Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: validated
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+      - smoke_verified
+    notes: Verified by local/WSL inference smoke for artifact contract; not a model-quality benchmark.
+
+  - task: detection
+    model_id: yolo12n
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO12n Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+    notes: Adapter-ready through the Ultralytics YOLO family adapter; exact model id and checkpoint path still need runtime validation.
+
+  - task: detection
+    model_id: yolo26n
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO26n Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+    notes: Adapter-ready as the main future YOLO-family candidate from model_md; runtime smoke has not validated this model id yet.
+
+  - task: detection
+    model_id: yolov8n
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLOv8n Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+    notes: Same adapter contract as YOLO11n; artifact contract is ready but this exact candidate is not smoke-validated in this project.
+
+  - task: detection
+    model_id: yolo11s
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO11s Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+      - size_ablation
+    notes: Adapter-ready YOLO11 small size variant; pretrained weight cache was verified locally.
+
+  - task: detection
+    model_id: yolo12s
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO12s Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+      - size_ablation
+    notes: Adapter-ready YOLO12 small size variant; pretrained weight cache was verified locally.
+
+  - task: detection
+    model_id: yolo26s
+    adapter_key: ultralytics_yolo_detection
+    adapter_type: ultralytics_yolo_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLO26s Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+    input_artifacts:
+      - manifest.json
+      - dataset.yaml
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - one_stage_detector
+      - bbox_detection
+      - size_ablation
+    notes: Adapter-ready YOLO26 small size variant; pretrained weight cache was verified locally.
+
+  - task: detection
+    model_id: d_fine
+    adapter_key: d_fine_detection
+    adapter_type: planned_detection
+    family: transformer_detection
+    display_name: D-FINE Detection
+    source: external
+    supports_train: true
+    supports_predict: true
+    implementation_status: external_command_adapter
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+    tags:
+      - transformer_detector
+      - bbox_detection
+      - gpu_preferred
+    notes: Candidate from model_md; COCO input contract and external command adapter are implemented. Native package/API execution still needs a model-specific command or wrapper script.
+
+  - task: detection
+    model_id: rf_detr
+    adapter_key: rf_detr_detection
+    adapter_type: planned_detection
+    family: transformer_detection
+    display_name: RF-DETR Detection
+    source: external
+    supports_train: true
+    supports_predict: true
+    implementation_status: external_command_adapter
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+    tags:
+      - transformer_detector
+      - bbox_detection
+      - gpu_preferred
+    notes: Candidate from model_md; COCO input contract and external command adapter are implemented. Native package/API execution still needs a model-specific command or wrapper script.
+
+  - task: detection
+    model_id: rt_detr
+    adapter_key: rt_detr_detection
+    adapter_type: planned_detection
+    family: transformer_detection
+    display_name: RT-DETR Detection
+    source: external
+    supports_train: true
+    supports_predict: true
+    implementation_status: external_command_adapter
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+    tags:
+      - transformer_detector
+      - bbox_detection
+      - gpu_preferred
+    notes: Candidate from model_md; COCO input contract and external command adapter are implemented. Native package/API execution still needs a model-specific command or wrapper script.
+
+  - task: detection
+    model_id: rt_detr_v2
+    adapter_key: rt_detr_v2_detection
+    adapter_type: planned_detection
+    family: transformer_detection
+    display_name: RT-DETRv2 Detection
+    source: huggingface_transformers
+    supports_train: true
+    supports_predict: true
+    implementation_status: external_command_adapter
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    recommended_uses:
+      - detector_only_screening
+      - transformer_detector_ablation
+    required_dependencies:
+      - transformers
+      - torch
+    tags:
+      - transformer_detector
+      - bbox_detection
+      - gpu_preferred
+      - rtdetr_v2
+    notes: Recent Hugging Face Transformers real-time DETR candidate; native train/inference wrapper is implemented and still requires GPU validation before promotion.
+
+  - task: detection
+    model_id: lw_detr
+    adapter_key: lw_detr_detection
+    adapter_type: planned_detection
+    family: transformer_detection
+    display_name: LW-DETR Detection
+    source: huggingface_transformers
+    supports_train: true
+    supports_predict: true
+    implementation_status: external_command_adapter
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    recommended_uses:
+      - detector_only_screening
+      - lightweight_transformer_detector_ablation
+    required_dependencies:
+      - transformers
+      - torch
+    tags:
+      - transformer_detector
+      - bbox_detection
+      - gpu_preferred
+      - lightweight_detr
+    notes: Lightweight DETR-family Hugging Face candidate; native train/inference wrapper is implemented and still requires GPU validation before promotion.
+
+  - task: detection
+    model_id: rtm_det
+    adapter_key: mmdet_detection
+    adapter_type: planned_detection
+    family: mmdetection
+    display_name: RTMDet Detection
+    source: openmmlab
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - coco/annotations/instances_train.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - mmdet
+    tags:
+      - one_stage_detector
+      - bbox_detection
+    notes: Candidate from model_md; engine task adapter skeleton and COCO input contract are prepared, but MMDetection runtime execution is not implemented.
+
+  - task: detection
+    model_id: yolo_world
+    adapter_key: yolo_world_open_vocab_detection
+    adapter_type: planned_detection
+    family: open_vocab_detection
+    display_name: YOLO-World Open-vocab Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - weak_labeling
+      - bbox_detection
+    notes: Prepared as a future labeling/review support model; engine task adapter skeleton records the prompt-set input contract, but runtime execution is not implemented.
+
+  - task: detection
+    model_id: grounding_dino_1_5
+    adapter_key: grounding_dino_open_vocab_detection
+    adapter_type: planned_detection
+    family: open_vocab_detection
+    display_name: Grounding DINO 1.5
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - weak_labeling
+      - bbox_detection
+    notes: Candidate from model_md for open-vocab review flows; engine task adapter skeleton records the prompt-set input contract, but runtime execution is not implemented.
+
+  - task: detection
+    model_id: yolov10n
+    adapter_key: yolov10_detection
+    adapter_type: planned_detection
+    family: ultralytics_yolo_detection
+    display_name: YOLOv10n Detection
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - yolo_bbox
+      - coco_detection
+    input_artifacts:
+      - manifest.json
+      - data.yaml or COCO annotations
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo
+      - bbox_detection
+    notes: Prepared as a YOLO-family candidate; dedicated engine adapter skeleton exists, but runtime execution is not implemented.
+
+  - task: detection
+    model_id: owlv2
+    adapter_key: owlv2_open_vocab_detection
+    adapter_type: planned_detection
+    family: open_vocab_detection
+    display_name: OWLv2 Open-vocab Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - bbox_detection
+      - weak_labeling
+    notes: Prepared for open-vocab labeling/review scenarios; runtime execution is not implemented.
+
+  - task: detection
+    model_id: dino_x
+    adapter_key: dino_x_open_world_detection
+    adapter_type: planned_detection
+    family: open_world_detection
+    display_name: DINO-X Open-world Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - torch
+    tags:
+      - open_world
+      - open_vocab
+      - bbox_detection
+    notes: Prepared as an open-world candidate; runtime execution is not implemented.
+
+  - task: detection
+    model_id: sahi_slicing
+    adapter_key: sahi_slicing_detection
+    adapter_type: planned_detection
+    family: sliced_inference_detection
+    display_name: SAHI Sliced Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - detector_checkpoint
+    input_artifacts:
+      - manifest.json
+      - base_detector checkpoint
+      - slicing_config.yaml
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - sahi
+      - torch
+    tags:
+      - small_object_detection
+      - sliced_inference
+      - bbox_detection
+    notes: Prepared as a detector-wrapper candidate for high-resolution/small-object images; runtime execution is not implemented.
+
+  - task: detection
+    model_id: asahi_slicing
+    adapter_key: asahi_slicing_detection
+    adapter_type: planned_detection
+    family: adaptive_sliced_inference_detection
+    display_name: ASAHI Adaptive Sliced Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_manifest
+      - detector_checkpoint
+    input_artifacts:
+      - manifest.json
+      - base_detector checkpoint
+      - slicing_config.yaml
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - sahi
+      - torch
+    tags:
+      - small_object_detection
+      - sliced_inference
+      - bbox_detection
+    notes: Prepared as an adaptive slicing candidate; runtime execution is not implemented.
+
+  - task: detection
+    model_id: yoloe
+    adapter_key: yoloe_open_vocab_detection
+    adapter_type: planned_detection
+    family: open_vocab_detection
+    display_name: YOLOE Open-vocab Detection
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json
+      - checkpoint.pt
+    output_artifacts:
+      - detection_predictions.json
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - yolo
+      - bbox_detection
+    notes: Prepared as a recent open-vocab YOLO-family candidate; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: bytetrack
+    adapter_key: bytetrack_tracker
+    adapter_type: bytetrack_tracker
+    family: tracking_by_detection
+    display_name: ByteTrack
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+      - mvp_candidate
+    notes: Engine task adapter consumes detection_predictions.json and emits tracking_predictions.json; needs video benchmark validation.
+
+  - task: tracking
+    model_id: bot_sort
+    adapter_key: botsort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: BoT-SORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+      - appearance_embedding
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+      - embeddings.npy
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - reid
+      - tracking_by_detection
+    notes: Engine tracking skeleton and detection-sequence input contract are prepared; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: oc_sort
+    adapter_key: ocsort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: OC-SORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Engine tracking skeleton and detection-sequence input contract are prepared; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: sort
+    adapter_key: sort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: SORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Engine tracking skeleton and detection-sequence input contract are prepared; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: deepsort
+    adapter_key: deepsort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: DeepSORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+      - appearance_embedding
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+      - embeddings.npy
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+      - torch
+    tags:
+      - tracking
+      - reid
+      - tracking_by_detection
+    notes: Prepared as a ReID-based tracking candidate; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: strongsort
+    adapter_key: strongsort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: StrongSORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+      - appearance_embedding
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+      - embeddings.npy
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+      - torch
+    tags:
+      - tracking
+      - reid
+      - tracking_by_detection
+    notes: Prepared as a ReID-based tracking candidate; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: boosttrack_plus_plus
+    adapter_key: boosttrack_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: BoostTrack++
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Prepared as a motion-boosted tracking candidate; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: tracktrack
+    adapter_key: tracktrack_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: TrackTrack
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Prepared as a tracking candidate from the extended inventory; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: pd_sort
+    adapter_key: pdsort_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: PD-SORT
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Prepared as a tracking candidate from the extended inventory; runtime execution is not implemented.
+
+  - task: tracking
+    model_id: tdlp
+    adapter_key: tdlp_tracker
+    adapter_type: planned_tracking
+    family: tracking_by_detection
+    display_name: TDLP Tracking
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - detection_sequence
+    input_artifacts:
+      - detection_predictions.json
+      - frame_manifest.json
+    output_artifacts:
+      - tracking_predictions.json
+    required_dependencies:
+      - numpy
+    tags:
+      - tracking
+      - tracking_by_detection
+    notes: Prepared as a tracking candidate from the extended inventory; runtime execution is not implemented.
+
+  - task: classification
+    model_id: mobilenet_v3_small
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: MobileNetV3 Small
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: validated
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - mobile_classifier
+      - object_level_classification
+      - smoke_verified
+    notes: Verified by local/WSL inference smoke for artifact contract; not a model-quality benchmark.
+
+  - task: classification
+    model_id: efficientnet_b0
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: EfficientNet-B0
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - compound_scaling
+      - object_level_classification
+    notes: Torchvision builder is mapped; needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: yolo26n-cls
+    adapter_key: ultralytics_yolo_classifier
+    adapter_type: ultralytics_yolo_classifier
+    family: ultralytics_yolo_classifier
+    display_name: YOLO26n Classifier
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - yolo26
+      - ultralytics
+      - object_level_classification
+      - top10
+    notes: Native Ultralytics classification task adapter for YOLO26-only detection/classification chains; uses yolo26n-cls weights when pretrained.
+
+  - task: classification
+    model_id: resnet50
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: ResNet-50
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - residual_network
+      - object_level_classification
+    notes: Torchvision builder is mapped; needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: resnext50_32x4d
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: ResNeXt-50 32x4d
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    recommended_uses:
+      - classifier_screening
+      - residual_cnn_ablation
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - resnext
+      - residual_network
+      - object_level_classification
+    notes: Torchvision builder is mapped; added as a stronger classic CNN comparison against ResNet-50.
+
+  - task: classification
+    model_id: resnet18
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: ResNet-18
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - residual_network
+      - object_level_classification
+    notes: Torchvision builder is mapped; included for model_md ResNet18/50 parity and needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: efficientnet_b3
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: EfficientNet-B3
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - compound_scaling
+      - object_level_classification
+    notes: Torchvision builder is mapped; needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: efficientnet_v2_s
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: EfficientNetV2-S
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - object_level_classification
+    notes: Torchvision builder is mapped; needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: convnext_v2_tiny
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: ConvNeXt V2 Tiny
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - convnext
+      - object_level_classification
+    notes: Timm model reference is mapped; needs dependency/runtime validation and benchmark smoke.
+
+  - task: classification
+    model_id: convnext_small
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: ConvNeXt Small
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    recommended_uses:
+      - classifier_screening
+      - convnext_size_ablation
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - convnext
+      - object_level_classification
+      - size_ablation
+    notes: Timm model reference is mapped to a pretrained ConvNeXt Small checkpoint available in the current timm runtime.
+
+  - task: classification
+    model_id: convnext_tiny
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: ConvNeXt Tiny
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - convnext
+      - object_level_classification
+    notes: Timm model reference is mapped; included for model_md ConvNeXt parity and needs dependency/runtime validation.
+
+  - task: classification
+    model_id: mobilenet_v3_large
+    adapter_key: torchvision_classifier
+    adapter_type: torchvision_classifier
+    family: torchvision_classifier
+    display_name: MobileNetV3 Large
+    source: torchvision
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint.pt
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - torchvision
+      - pillow
+    tags:
+      - cnn
+      - mobile_classifier
+      - object_level_classification
+    notes: Torchvision builder is mapped; needs explicit smoke/benchmark validation.
+
+  - task: classification
+    model_id: vit_tiny
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: ViT Tiny
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - vision_transformer
+      - object_level_classification
+    notes: Timm model reference is mapped; needs dependency/runtime validation and benchmark smoke.
+
+  - task: classification
+    model_id: vit_base
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: ViT Base
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - vision_transformer
+      - object_level_classification
+    notes: Timm model reference is mapped; needs dependency/runtime validation and benchmark smoke.
+
+  - task: classification
+    model_id: deit_tiny
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: DeiT Tiny
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - vision_transformer
+      - object_level_classification
+    notes: Timm model reference is mapped; needs dependency/runtime validation and benchmark smoke.
+
+  - task: classification
+    model_id: swin_tiny
+    adapter_key: timm_classifier
+    adapter_type: timm_classifier
+    family: timm_classifier
+    display_name: Swin Tiny
+    source: timm
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: adapter_ready
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+      - checkpoint
+    required_dependencies:
+      - torch
+      - timm
+      - pillow
+    tags:
+      - swin_transformer
+      - object_level_classification
+    notes: Timm model reference is mapped; needs dependency/runtime validation and benchmark smoke.
+
+  - task: classification
+    model_id: coca_vit
+    adapter_key: coca_classifier
+    adapter_type: planned_classification
+    family: vision_language_classification
+    display_name: CoCa ViT Classification
+    source: openclip
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_folder
+      - object_crop_manifest
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - classification_predictions.json
+    required_dependencies:
+      - torch
+      - open_clip_torch
+    tags:
+      - vision_language
+      - zero_shot_classification
+      - object_level_classification
+    notes: Prepared as a vision-language classification candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yolo11n_seg
+    adapter_key: ultralytics_yolo_segmentation
+    adapter_type: planned_segmentation
+    family: ultralytics_yolo_segmentation
+    display_name: YOLO11n-seg
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - yolo_segmentation
+      - coco_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask_path or polygon segmentation labels
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - instance_segmentation
+      - supervised_segmentation
+    notes: Engine task adapter skeleton and mask-label input contract are prepared, but YOLO-seg runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yolo26n_seg
+    adapter_key: ultralytics_yolo_segmentation
+    adapter_type: planned_segmentation
+    family: ultralytics_yolo_segmentation
+    display_name: YOLO26n-seg
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - yolo_segmentation
+      - coco_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask_path or polygon segmentation labels
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - instance_segmentation
+      - supervised_segmentation
+    notes: Main future YOLO segmentation candidate from model_md; engine skeleton is prepared, but runtime execution still requires mask-ready data and implementation.
+
+  - task: segmentation
+    model_id: sam2
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: SAM 2
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - foundation_model
+    notes: Promptable segmentation skeleton is prepared; runnable inference still needs prompt source wiring and SAM runtime implementation.
+
+  - task: segmentation
+    model_id: sam3
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: SAM 3
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - foundation_model
+    notes: Future promptable segmentation candidate from model_md; skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: mobile_sam
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: MobileSAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - lightweight
+    notes: Candidate from model_md; SAM-family skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yolov8n_seg
+    adapter_key: ultralytics_yolo_segmentation
+    adapter_type: planned_segmentation
+    family: ultralytics_yolo_segmentation
+    display_name: YOLOv8n-seg
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - yolo_segmentation
+      - coco_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask_path or polygon segmentation labels
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - instance_segmentation
+      - supervised_segmentation
+      - yolo
+    notes: Prepared through the YOLO-seg skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yolo26n_sem
+    adapter_key: ultralytics_yolo_segmentation
+    adapter_type: planned_segmentation
+    family: ultralytics_yolo_segmentation
+    display_name: YOLO26n Semantic Segmentation
+    source: ultralytics
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - yolo_segmentation
+      - coco_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask_path or polygon segmentation labels
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+      - checkpoint
+    required_dependencies:
+      - ultralytics
+      - torch
+      - pillow
+    tags:
+      - semantic_segmentation
+      - supervised_segmentation
+      - yolo
+    notes: Prepared as a semantic segmentation candidate from model_md; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: sam
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: SAM
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - foundation_model
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: sam2_1
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: SAM 2.1
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - foundation_model
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: hq_sam
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: HQ-SAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - high_quality_masks
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: efficient_sam
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: EfficientSAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - lightweight
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: efficientvit_sam
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: EfficientViT-SAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - lightweight
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: mobile_sam_v2
+    adapter_key: sam_promptable_segmentation
+    adapter_type: planned_segmentation
+    family: sam_promptable_segmentation
+    display_name: MobileSAM v2
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - lightweight
+    notes: Prepared through the SAM-family skeleton contract; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: fast_sam
+    adapter_key: fast_sam_segmentation
+    adapter_type: planned_segmentation
+    family: fast_promptable_segmentation
+    display_name: FastSAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - bbox_prompt
+      - point_prompt
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - promptable_segmentation
+      - fast_masks
+    notes: Prepared as a FastSAM candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: rf_detr_seg
+    adapter_key: detection_guided_segmentation
+    adapter_type: planned_segmentation
+    family: detection_guided_segmentation
+    display_name: RF-DETR Segmentation
+    source: external
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_segmentation
+      - detection_predictions
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json or mask labels
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - detection_guided_segmentation
+      - instance_segmentation
+    notes: Prepared as a detection-guided segmentation candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: d_fine_seg
+    adapter_key: detection_guided_segmentation
+    adapter_type: planned_segmentation
+    family: detection_guided_segmentation
+    display_name: D-FINE Segmentation
+    source: external
+    supports_train: true
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - coco_segmentation
+      - detection_predictions
+    input_artifacts:
+      - manifest.json
+      - detection_predictions.json or mask labels
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - detection_guided_segmentation
+      - instance_segmentation
+    notes: Prepared as a detection-guided segmentation candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: grounded_sam
+    adapter_key: grounded_sam_segmentation
+    adapter_type: planned_segmentation
+    family: grounded_promptable_segmentation
+    display_name: Grounded-SAM
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+      - detection_predictions
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json or detection_predictions.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - grounded_segmentation
+      - promptable_segmentation
+    notes: Prepared for detection-plus-SAM segmentation workflows; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: grounded_sam2
+    adapter_key: grounded_sam_segmentation
+    adapter_type: planned_segmentation
+    family: grounded_promptable_segmentation
+    display_name: Grounded-SAM 2
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+      - detection_predictions
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json or detection_predictions.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - grounded_segmentation
+      - promptable_segmentation
+    notes: Prepared for detection-plus-SAM segmentation workflows; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yoloe_seg
+    adapter_key: yoloe_segmentation
+    adapter_type: planned_segmentation
+    family: open_vocab_yolo_segmentation
+    display_name: YOLOE Segmentation
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+      - yolo_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask labels or prompt_set.json
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - yolo
+      - instance_segmentation
+    notes: Prepared as an open-vocab segmentation candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: yoloe_26_seg
+    adapter_key: yoloe_segmentation
+    adapter_type: planned_segmentation
+    family: open_vocab_yolo_segmentation
+    display_name: YOLOE-26 Segmentation
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+      - yolo_segmentation
+    input_artifacts:
+      - manifest.json
+      - mask labels or prompt_set.json
+      - checkpoint.pt
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - open_vocab
+      - yolo
+      - instance_segmentation
+    notes: Prepared as an open-vocab segmentation candidate; runtime execution is not implemented.
+
+  - task: segmentation
+    model_id: dino_x_seg
+    adapter_key: dino_x_segmentation
+    adapter_type: planned_segmentation
+    family: open_world_segmentation
+    display_name: DINO-X Segmentation
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image_manifest
+      - text_prompt
+      - detection_predictions
+    input_artifacts:
+      - manifest.json
+      - prompt_set.json or detection_predictions.json
+      - checkpoint
+    output_artifacts:
+      - segmentation_predictions.json
+      - mask_artifacts
+    required_dependencies:
+      - torch
+    tags:
+      - open_world
+      - promptable_segmentation
+    notes: Prepared as an open-world segmentation candidate; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: dinov2_vits14
+    adapter_key: dinov2_embedding
+    adapter_type: planned_embedding
+    family: self_supervised_vision_transformer
+    display_name: DINOv2 ViT-S/14
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - self_supervised_embedding
+      - retrieval
+    notes: Engine embedding skeleton and embeddings.npy plus embedding_predictions.json contract are prepared, but runtime execution is not implemented.
+
+  - task: embedding
+    model_id: dinov3_vits16
+    adapter_key: dinov3_embedding
+    adapter_type: planned_embedding
+    family: self_supervised_vision_transformer
+    display_name: DINOv3 ViT-S/16
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - self_supervised_embedding
+      - retrieval
+    notes: Future embedding candidate from model_md; skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: embedding
+    model_id: clip_vit_b_32
+    adapter_key: clip_embedding
+    adapter_type: planned_embedding
+    family: vision_language_embedding
+    display_name: CLIP ViT-B/32
+    source: openai
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - vision_language_embedding
+      - retrieval
+    notes: Prepared from model_md for image-text retrieval; skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: embedding
+    model_id: openclip_vit_b_32
+    adapter_key: clip_embedding
+    adapter_type: planned_embedding
+    family: vision_language_embedding
+    display_name: OpenCLIP ViT-B/32
+    source: openclip
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+      - open_clip_torch
+    tags:
+      - vision_transformer
+      - vision_language_embedding
+      - retrieval
+    notes: Prepared from model_md; OpenCLIP skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: embedding
+    model_id: siglip2_base_patch16
+    adapter_key: siglip_embedding
+    adapter_type: planned_embedding
+    family: vision_language_embedding
+    display_name: SigLIP 2 Base Patch16
+    source: external
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - vision_language_embedding
+      - retrieval
+    notes: Candidate from model_md; SigLIP skeleton contract is prepared, but runtime execution is not implemented.
+
+  - task: embedding
+    model_id: dinov3_vitb16
+    adapter_key: dinov3_embedding
+    adapter_type: planned_embedding
+    family: self_supervised_vision_transformer
+    display_name: DINOv3 ViT-B/16
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - self_supervised_embedding
+      - retrieval
+    notes: Prepared through the DINOv3 embedding skeleton contract; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: dinov3_vitl16
+    adapter_key: dinov3_embedding
+    adapter_type: planned_embedding
+    family: self_supervised_vision_transformer
+    display_name: DINOv3 ViT-L/16
+    source: meta
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - vision_transformer
+      - self_supervised_embedding
+      - retrieval
+    notes: Prepared through the DINOv3 embedding skeleton contract; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: classifier_penultimate_embedding
+    adapter_key: classifier_penultimate_embedding
+    adapter_type: planned_embedding
+    family: classifier_feature_embedding
+    display_name: Classifier Penultimate Embedding
+    source: internal
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - classifier checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+    tags:
+      - classifier_embedding
+      - retrieval
+      - object_level_embedding
+    notes: Prepared as a feature-extraction hook from trained classifiers; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: resnet50_embedding
+    adapter_key: classifier_penultimate_embedding
+    adapter_type: planned_embedding
+    family: classifier_feature_embedding
+    display_name: ResNet-50 Penultimate Embedding
+    source: torchvision
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - classifier checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+      - torchvision
+    tags:
+      - classifier_embedding
+      - retrieval
+      - object_level_embedding
+    notes: Prepared as a classifier-derived embedding candidate; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: efficientnet_b0_embedding
+    adapter_key: classifier_penultimate_embedding
+    adapter_type: planned_embedding
+    family: classifier_feature_embedding
+    display_name: EfficientNet-B0 Penultimate Embedding
+    source: torchvision
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - local
+      - wsl
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - classifier checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+      - torchvision
+    tags:
+      - classifier_embedding
+      - retrieval
+      - object_level_embedding
+    notes: Prepared as a classifier-derived embedding candidate; runtime execution is not implemented.
+
+  - task: embedding
+    model_id: coca_vit_embedding
+    adapter_key: coca_embedding
+    adapter_type: planned_embedding
+    family: vision_language_embedding
+    display_name: CoCa ViT Embedding
+    source: openclip
+    supports_train: false
+    supports_predict: true
+    implementation_status: adapter_skeleton
+    readiness_status: prepared
+    runtime_targets:
+      - gpu
+    input_formats:
+      - image
+      - object_crop_manifest
+      - detector_crop
+      - text_prompt
+    input_artifacts:
+      - manifest.json
+      - classification_input_manifest.json
+      - prompt_set.json
+      - checkpoint
+    output_artifacts:
+      - embedding_predictions.json
+      - embeddings.npy
+      - embeddings_meta.csv
+    required_dependencies:
+      - torch
+      - open_clip_torch
+    tags:
+      - vision_language_embedding
+      - retrieval
+      - zero_shot_embedding
+    notes: Prepared as a vision-language embedding candidate; runtime execution is not implemented.

@@ -1,0 +1,81 @@
+schema_version: '0.1'
+experiment:
+  name: local_torchvision_classifier_smoke
+  description: Local CPU Torchvision classifier inference smoke on the small vision
+    fixture.
+  tags:
+  - local
+  - torchvision
+  - classification
+  - real-adapter-smoke
+runtime:
+  runner: local_simulator
+  workspace: ../../runs/workspaces
+  experiment_root: ../../runs/experiments
+  python_executable: python
+  remote_python_executable: python
+code:
+  entrypoint: ../../local_remote_simulator/scripts/mock_train.py
+  working_dir: ../../local_remote_simulator
+  args: []
+  package_include:
+  - scripts/mock_train.py
+  - datasets/small_vision_fixture/**
+  package_exclude: []
+train:
+  args:
+  - --epochs
+  - '1'
+  - --model
+  - torchvision_classifier_smoke
+  - --dataset
+  - small_vision_fixture
+  env: {}
+  max_seconds: 120
+  fail_fast: true
+data_variants:
+- id: small_vision_fixture
+  kind: original
+  path: ../../local_remote_simulator/datasets/small_vision_fixture
+  enabled: true
+tasks:
+- id: classify_small_fixture_torchvision
+  task_type: classification
+  input_variant: small_vision_fixture
+  model_id: mobilenet_v3_small
+  adapter: torchvision_classifier
+  enabled: true
+  params:
+    execution_mode: inference_smoke
+    pretrained: false
+    image_size: 224
+    top_k: 2
+    batch_size: 32
+output:
+  log_file: train.log
+  metrics_file: metrics.csv
+  checkpoint_file: best.pt
+  status_file: status.marker
+  summary_file: summary.md
+  save_json: true
+  save_csv: true
+  save_summary: true
+  save_checkpoints: false
+  save_previews: true
+  collect_patterns:
+  - train.log
+  - metrics.csv
+  - metrics.json
+  - status.marker
+  - summary.md
+  - experiment.json
+  - artifacts.json
+  - timings.csv
+  - task_results.json
+  - tasks/**/*.json
+analysis:
+  primary_metric: accuracy
+  higher_is_better: true
+  failure_rules_enabled: true
+repository:
+  sqlite_path: ../../runs/torchvision_classifier_experiments.sqlite3
